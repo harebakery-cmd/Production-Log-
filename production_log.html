@@ -1,0 +1,2733 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제품 생산 및 출고 일지</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Malgun Gothic','맑은 고딕',sans-serif; font-size:12px; background:#f5f5f5; color:#333; }
+
+/* Header */
+.header { background:#fff; border-bottom:1px solid #e0e0e0; padding:8px 16px; display:flex; align-items:center; justify-content:space-between; }
+.header-left { display:flex; align-items:center; gap:10px; }
+.logo-badge { background:#4CAF50; color:#fff; font-size:11px; font-weight:bold; padding:3px 7px; border-radius:3px; }
+.header-title { font-size:14px; font-weight:bold; }
+.header-sub { font-size:11px; color:#888; margin-top:1px; }
+.header-right { display:flex; gap:8px; }
+.btn { padding:6px 14px; border:none; border-radius:4px; cursor:pointer; font-size:12px; display:flex; align-items:center; gap:4px; font-family:inherit; }
+.btn-primary { background:#1976D2; color:#fff; } .btn-primary:hover { background:#1565C0; }
+.btn-secondary { background:#fff; color:#555; border:1px solid #ccc; } .btn-secondary:hover { background:#f5f5f5; }
+
+/* Summary */
+.summary-section { padding:12px 16px; background:#fff; border-bottom:1px solid #e0e0e0; }
+.summary-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+.summary-card { border:1px solid #e0e0e0; border-radius:6px; padding:12px 16px; }
+.summary-card-label { font-size:11px; color:#888; margin-bottom:6px; }
+.summary-card-value { font-size:22px; font-weight:bold; }
+
+/* Controls */
+.controls { padding:10px 16px; background:#fff; border-bottom:1px solid #e0e0e0; display:flex; align-items:center; justify-content:space-between; }
+.date-area { display:flex; align-items:center; gap:8px; }
+.date-input { border:1px solid #ccc; border-radius:4px; padding:5px 8px; font-size:12px; font-family:inherit; }
+select { border:1px solid #ccc; border-radius:4px; padding:4px 6px; font-size:11px; font-family:inherit; background:#fff; }
+
+/* Notice */
+.notice-banner { margin:10px 16px; background:#FFF3E0; border:1px solid #FFB74D; border-radius:4px; padding:8px 16px; font-size:12px; color:#E65100; }
+
+/* Current cat bar */
+.current-cat-bar { margin:0 16px 6px; padding:6px 12px; background:#E3F2FD; border:1px solid #90CAF9; border-radius:4px; font-size:11px; color:#1565C0; display:flex; align-items:center; justify-content:space-between; }
+.current-cat-bar strong { font-size:12px; }
+
+/* Table */
+.table-section { margin:0 16px 12px; }
+.table-header { display:flex; align-items:center; justify-content:space-between; padding:8px 0; }
+.table-title { font-size:12px; font-weight:bold; }
+.table-actions { display:flex; gap:6px; }
+.btn-small { padding:5px 10px; border:1px solid #ccc; border-radius:4px; background:#fff; cursor:pointer; font-size:11px; font-family:inherit; }
+.btn-small:hover { background:#f0f0f0; }
+.btn-blue  { background:#1976D2; color:#fff; border-color:#1976D2; } .btn-blue:hover  { background:#1565C0!important; }
+.btn-green { background:#388E3C; color:#fff; border-color:#388E3C; } .btn-green:hover { background:#2E7D32!important; }
+.btn-orange{ background:#F57C00; color:#fff; border-color:#F57C00; } .btn-orange:hover{ background:#E65100!important; }
+
+.main-table { width:100%; border-collapse:collapse; background:#fff; border:1px solid #e0e0e0; font-size:11px; }
+.main-table th { background:#F5F5F5; border:1px solid #e0e0e0; padding:7px 6px; text-align:center; font-weight:600; color:#444; white-space:nowrap; }
+.main-table td { border:1px solid #e8e8e8; padding:5px 6px; text-align:center; }
+.main-table tr.data-row:hover td { background:#f8f9fa; }
+.col-product { text-align:left!important; padding-left:10px!important; min-width:120px; cursor:pointer; }
+.col-product:hover { filter: brightness(0.95); }
+.input-cell { border:none; text-align:center; background:transparent; font-size:11px; font-family:inherit; outline:none; width:38px; }
+.input-cell:focus { background:#E3F2FD; border-radius:3px; }
+.qty-box { width:46px; height:28px; border:1px solid #ccc; border-radius:4px; text-align:center; font-size:12px; font-family:inherit; outline:none; -moz-appearance:textfield; padding:0; background:#fff; display:block; margin:0 auto; }
+.qty-box::-webkit-outer-spin-button,.qty-box::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+.qty-box:focus { border-color:#1976D2; background:#E3F2FD; }
+.note-btn { padding:0 8px; background:#fff; border:1px solid #ccc; border-radius:4px; cursor:pointer; font-size:11px; color:#555; font-family:inherit; height:28px; line-height:28px; display:inline-flex; align-items:center; justify-content:center; white-space:nowrap; min-width:52px; text-align:center; }
+.note-btn:hover { background:#e8f4ff; color:#1976D2; border-color:#90CAF9; }
+.note-btn.has-memo { background:#E3F2FD; border-color:#90CAF9; color:#1565C0; }
+
+/* Cat grid */
+.cat-section { margin:8px 16px 16px; }
+.cat-label { font-size:11px; font-weight:bold; color:#555; margin-bottom:8px; }
+.cat-grid { display:grid; grid-template-columns:repeat(6,1fr); border:1px solid #ccc; border-radius:6px; overflow:hidden; }
+.cat-cell { padding:13px 8px; text-align:center; cursor:pointer; font-size:11px; font-weight:600; color:#555; background:#f0f0f0; border-right:1px solid #ccc; border-bottom:1px solid #ccc; user-select:none; transition:background .13s,color .13s; line-height:1.4; }
+.cat-cell:nth-child(6n) { border-right:none; }
+.cat-cell:nth-child(n+7) { border-bottom:none; }
+.cat-cell:hover { background:#dce8f5; color:#1565C0; }
+.cat-cell.active { background:#1976D2; color:#fff; font-weight:700; }
+.cat-cell.active:hover { background:#1565C0; }
+.cat-count { display:none; }
+
+/* ── 팝업 공통 ── */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:1000; align-items:center; justify-content:center; }
+.overlay.show { display:flex; }
+.modal { background:#fff; border-radius:8px; box-shadow:0 8px 32px rgba(0,0,0,.22); display:flex; flex-direction:column; animation:popIn .16s ease; max-height:90vh; }
+@keyframes popIn { from{transform:scale(.93);opacity:0} to{transform:scale(1);opacity:1} }
+.modal-header { padding:14px 16px 10px; border-bottom:1px solid #eee; display:flex; align-items:flex-start; justify-content:space-between; }
+.modal-title { font-size:13px; font-weight:bold; color:#1976D2; }
+.modal-sub { font-size:10px; color:#aaa; margin-top:3px; }
+.modal-close { background:none; border:none; cursor:pointer; font-size:20px; color:#bbb; line-height:1; padding:0 2px; }
+.modal-close:hover { color:#555; }
+.modal-body { padding:14px 16px; overflow-y:auto; flex:1; }
+.modal-footer { padding:10px 16px; border-top:1px solid #eee; display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap; }
+
+/* 목록 수정 팝업 */
+.item-list { list-style:none; }
+.item-list li { display:flex; align-items:center; gap:5px; padding:4px 2px; border-bottom:1px solid #f5f5f5; border-radius:3px; transition:background .12s; }
+.item-list li:last-child { border-bottom:none; }
+.item-list li.drag-over-top { border-top:2px solid #1976D2 !important; }
+.item-list li.dragging { opacity:0.35; background:#f0f4ff; }
+.drag-handle { cursor:grab; color:#ccc; font-size:15px; padding:0 2px; flex-shrink:0; user-select:none; line-height:1; }
+.drag-handle:hover { color:#888; }
+.drag-handle:active { cursor:grabbing; }
+.item-idx { font-size:10px; color:#ccc; width:16px; text-align:right; flex-shrink:0; }
+.item-input { flex:1; border:1px solid #e0e0e0; border-radius:4px; padding:4px 7px; font-size:12px; font-family:inherit; outline:none; }
+.item-input:focus { border-color:#1976D2; background:#E8F5FF; }
+.item-del { background:none; border:none; cursor:pointer; color:#e0e0e0; font-size:15px; padding:0 3px; transition:color .1s; flex-shrink:0; }
+.item-del:hover { color:#e53935; }
+.add-section { margin-top:12px; padding-top:10px; border-top:1px dashed #e0e0e0; }
+.add-section-title { font-size:10px; color:#888; margin-bottom:6px; }
+.add-main-row { display:flex; gap:6px; margin-bottom:6px; }
+.add-input { flex:1; border:1px solid #ccc; border-radius:4px; padding:5px 8px; font-size:12px; font-family:inherit; outline:none; }
+.add-input:focus { border-color:#1976D2; }
+.add-pos-row { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.add-pos-label { font-size:11px; color:#555; white-space:nowrap; }
+.add-pos-input { width:48px; border:1px solid #ccc; border-radius:4px; padding:4px 6px; font-size:11px; text-align:center; font-family:inherit; outline:none; }
+.add-pos-input:focus { border-color:#1976D2; }
+.add-pos-hint { font-size:10px; color:#aaa; }
+.add-btn { padding:5px 13px; background:#1976D2; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit; white-space:nowrap; }
+.add-btn:hover { background:#1565C0; }
+.empty-msg { text-align:center; color:#bbb; font-size:11px; padding:20px 0; }
+
+/* 메모 팝업 */
+.memo-textarea { width:100%; height:100px; border:1px solid #ccc; border-radius:4px; padding:8px; font-size:12px; font-family:inherit; resize:vertical; outline:none; }
+.memo-textarea:focus { border-color:#1976D2; }
+
+/* 기록 팝업 */
+.record-table { width:100%; border-collapse:collapse; font-size:11px; }
+.record-table th { background:#f5f5f5; border:1px solid #e0e0e0; padding:6px 8px; text-align:center; font-weight:600; }
+.record-table td { border:1px solid #e8e8e8; padding:5px 8px; text-align:center; }
+.record-table tr:hover td { background:#f8f9fa; }
+.record-empty { text-align:center; color:#bbb; padding:30px; font-size:12px; }
+
+/* 설정 팝업 */
+.setting-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid #f5f5f5; }
+.setting-row:last-child { border-bottom:none; }
+.setting-label { font-size:12px; color:#444; font-weight:500; }
+.setting-desc { font-size:10px; color:#aaa; margin-top:2px; }
+.toggle { position:relative; display:inline-block; width:40px; height:22px; }
+.toggle input { opacity:0; width:0; height:0; }
+.slider { position:absolute; cursor:pointer; inset:0; background:#ccc; border-radius:22px; transition:.3s; }
+.slider:before { position:absolute; content:""; height:16px; width:16px; left:3px; bottom:3px; background:#fff; border-radius:50%; transition:.3s; }
+input:checked + .slider { background:#1976D2; }
+input:checked + .slider:before { transform:translateX(18px); }
+
+
+/* btn variants */
+.btn-save   { background:#388E3C; color:#fff; border:none; border-radius:4px; padding:5px 14px; cursor:pointer; font-size:11px; font-family:inherit; }
+.btn-save:hover { background:#2E7D32; }
+.btn-cancel { background:#fff; color:#555; border:1px solid #ccc; border-radius:4px; padding:5px 14px; cursor:pointer; font-size:11px; font-family:inherit; }
+.btn-cancel:hover { background:#f5f5f5; }
+.btn-danger { background:#e53935; color:#fff; border:none; border-radius:4px; padding:5px 14px; cursor:pointer; font-size:11px; font-family:inherit; }
+.btn-danger:hover { background:#c62828; }
+
+/* 수량 입력 박스 — 위쪽 정의 사용 (중복 제거) */
+
+/* 판매가 입력 */
+.price-input { border:none; text-align:right; background:transparent; font-size:11px; font-family:inherit; outline:none; width:72px; min-width:60px; display:block; color:#555; padding:4px 6px; }
+.price-input:focus { background:#FFF9C4; border-radius:3px; }
+.price-input:hover { background:#FFFDE7; border-radius:3px; }
+
+/* 결산 팝업 */
+.sett-tab { padding:10px 20px; border:none; background:transparent; cursor:pointer; font-size:12px; font-family:inherit; font-weight:600; color:#666; border-bottom:3px solid transparent; transition:all .2s; }
+.sett-tab:hover { background:#e8f0fe; color:#1976D2; }
+.sett-tab.active { color:#1976D2; border-bottom:3px solid #1976D2; background:#fff; }
+
+/* 결산 기간 필터 */
+.sett-period-bar { padding:10px 16px; background:#F8F9FA; border-bottom:1px solid #e0e0e0; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.sett-period-label { font-size:11px; color:#555; font-weight:600; white-space:nowrap; }
+.sett-mode-btn { padding:5px 12px; border:1px solid #ccc; border-radius:20px; background:#fff; cursor:pointer; font-size:11px; font-family:inherit; color:#555; transition:all .15s; white-space:nowrap; }
+.sett-mode-btn:hover { border-color:#1976D2; color:#1976D2; }
+.sett-mode-btn.active { background:#1976D2; color:#fff; border-color:#1976D2; font-weight:600; }
+.sett-date-range { display:flex; align-items:center; gap:6px; margin-left:4px; }
+.sett-date-range input[type=date] { border:1px solid #ccc; border-radius:4px; padding:4px 7px; font-size:11px; font-family:inherit; outline:none; background:#fff; }
+.sett-date-range input[type=date]:focus { border-color:#1976D2; }
+.sett-range-sep { font-size:11px; color:#888; }
+.sett-apply-btn { padding:5px 14px; background:#1976D2; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:11px; font-family:inherit; font-weight:600; }
+.sett-apply-btn:hover { background:#1565C0; }
+.sett-period-info { font-size:10px; color:#1976D2; background:#E3F2FD; padding:3px 8px; border-radius:10px; border:1px solid #90CAF9; white-space:nowrap; }
+.sett-group { margin-bottom:18px; }
+.sett-group-title { font-size:12px; font-weight:bold; color:#1976D2; padding:8px 12px; background:#E3F2FD; border-radius:4px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+.sett-table { width:100%; border-collapse:collapse; font-size:11px; }
+.sett-table th { background:#F5F5F5; border:1px solid #e0e0e0; padding:6px 10px; text-align:center; font-weight:600; color:#444; }
+.sett-table td { border:1px solid #e8e8e8; padding:5px 10px; }
+.sett-table td:first-child { text-align:left; }
+.sett-table td:not(:first-child) { text-align:right; }
+.sett-table tr:hover td { background:#f8f9fa; }
+.sett-subtotal td { background:#FFF3E0!important; font-weight:bold; }
+.sett-grand td { background:#E3F2FD!important; font-weight:bold; font-size:12px; }
+
+/* 누적 집계 테이블 */
+.accum-table { width:100%; border-collapse:collapse; font-size:11px; min-width:700px; }
+.accum-table th { background:#E8EAF6; border:1px solid #C5CAE9; padding:7px 8px; text-align:center; font-weight:700; color:#283593; white-space:nowrap; position:sticky; top:0; z-index:2; }
+.accum-table th.col-store { background:#1976D2; color:#fff; }
+.accum-table td { border:1px solid #e8e8e8; padding:5px 8px; text-align:right; }
+.accum-table td.col-name { text-align:left; font-weight:500; color:#333; min-width:120px; }
+.accum-table td.col-total { background:#E3F2FD; font-weight:700; color:#0D47A1; }
+.accum-table tr.accum-subtotal td { background:#FFF3E0; font-weight:700; color:#E65100; }
+.accum-table tr.accum-grand td { background:#E8F5E9; font-weight:700; color:#1B5E20; font-size:12px; }
+.accum-table tr:hover td { background:#f0f4ff; }
+.accum-table tr.accum-subtotal:hover td,
+.accum-table tr.accum-grand:hover td { filter:brightness(0.97); }
+.accum-zero { color:#ccc; }
+.accum-cat-header { font-size:12px; font-weight:700; color:#1565C0; background:#E3F2FD; border-left:4px solid #1976D2; padding:7px 12px; margin:12px 0 0; border-radius:0 4px 4px 0; }
+
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#323232; color:#fff; padding:9px 20px; border-radius:6px; font-size:12px; z-index:9999; opacity:0; transition:opacity .3s; pointer-events:none; white-space:nowrap; }
+.toast.show { opacity:1; }
+
+/* 색상 선택 툴바 */
+.color-picker-bar {
+  display:flex; align-items:center; gap:6px;
+  padding:6px 10px; background:#F8F9FA;
+  border:1px solid #e0e0e0; border-radius:6px;
+  flex-wrap:wrap;
+}
+.color-picker-label { font-size:11px; color:#666; white-space:nowrap; font-weight:500; }
+.color-swatch {
+  width:22px; height:22px; border-radius:4px; border:2px solid transparent;
+  cursor:pointer; transition:transform .12s, border-color .12s;
+  flex-shrink:0;
+}
+.color-swatch:hover { transform:scale(1.18); border-color:#555; }
+.color-swatch.active { border-color:#1976D2; transform:scale(1.18); box-shadow:0 0 0 2px #90CAF9; }
+.color-swatch-clear {
+  width:22px; height:22px; border-radius:4px; border:1px dashed #bbb;
+  cursor:pointer; background:#fff; font-size:13px; display:flex;
+  align-items:center; justify-content:center; color:#bbb; flex-shrink:0;
+  transition:border-color .12s, color .12s;
+}
+.color-swatch-clear:hover { border-color:#e53935; color:#e53935; }
+.color-picker-hint { font-size:10px; color:#aaa; margin-left:2px; }
+.qty-box.color-selected { border-color:#aaa !important; }
+.qty-box.focus-target { outline:2px solid #1976D2 !important; outline-offset:1px; }
+
+/* ══════════════════════════════════════════
+   모바일 반응형 (768px 이하)
+══════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── 기준 ── */
+  body { font-size:12px; }
+
+  /* 헤더 */
+  .header { padding:6px 10px; flex-wrap:wrap; gap:5px; }
+  .header-title { font-size:12px; }
+  .header-sub { font-size:10px; }
+  #cloudBadge { font-size:10px; margin-right:0; }
+  .header-right { gap:4px; flex-wrap:wrap; }
+  .btn { padding:0 9px; font-size:11px; gap:2px; height:30px; line-height:30px; display:inline-flex; align-items:center; }
+
+  /* 요약 카드 — 2×2 */
+  .summary-section { padding:8px 10px; }
+  .summary-cards { grid-template-columns:repeat(2,1fr); gap:6px; }
+  .summary-card { padding:7px 10px; }
+  .summary-card-label { font-size:10px; margin-bottom:2px; }
+  .summary-card-value { font-size:18px; }
+
+  /* 날짜·자동저장 */
+  .controls { flex-direction:column; align-items:flex-start; gap:6px; padding:7px 10px; }
+  .date-area { gap:5px; }
+  .date-input { font-size:11px; padding:0 8px; height:30px; border-radius:4px; }
+  select { font-size:11px; padding:0 6px; height:30px; }
+
+  /* 공지 */
+  .notice-banner { margin:6px 10px; padding:6px 10px; font-size:11px; }
+
+  /* 분류 그리드 — 3열 */
+  .cat-section { margin:6px 10px 8px; }
+  .cat-label { font-size:10px; margin-bottom:5px; }
+  .cat-grid { grid-template-columns:repeat(3,1fr); }
+  .cat-cell { padding:10px 4px; font-size:10px; line-height:1.3; }
+  .cat-cell:nth-child(6n)   { border-right:1px solid #ccc; }
+  .cat-cell:nth-child(3n)   { border-right:none; }
+  .cat-cell:nth-child(n+7)  { border-bottom:1px solid #ccc; }
+  .cat-cell:nth-child(n+10) { border-bottom:none; }
+
+  /* 현재 분류 바 */
+  .current-cat-bar { margin:0 10px 5px; padding:5px 10px; font-size:10px; }
+  .current-cat-bar strong { font-size:11px; }
+
+  /* ── 테이블 영역 ── */
+  .table-section { margin:0 10px 10px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .table-header { flex-direction:row; align-items:center; justify-content:space-between; gap:5px; padding:5px 0; flex-wrap:wrap; }
+  .table-title { font-size:11px; font-weight:bold; white-space:nowrap; }
+  .table-actions { display:flex; gap:3px; flex-wrap:wrap; }
+
+  /* 액션 버튼 — 모두 동일 크기 */
+  .btn-small {
+    padding:0 8px;
+    font-size:11px;
+    height:28px;
+    line-height:28px;
+    white-space:nowrap;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:4px;
+  }
+
+  /* 테이블 헤더·셀 */
+  .main-table { font-size:11px; }
+  .main-table th { padding:7px 12px; font-size:11px; white-space:nowrap; }
+  .main-table td { padding:5px 10px; }
+
+  /* 제품명 열 */
+  .col-product { min-width:75px; max-width:100px; padding-left:8px!important; font-size:11px; }
+
+  /* 수량 입력 박스 — qty-box 통일 */
+  .qty-box { width:52px; height:28px; font-size:12px; border-radius:4px; }
+
+  /* 판매가 */
+  .price-input { width:68px; min-width:58px; font-size:11px; padding:0 6px; height:28px; }
+
+  /* 비고 버튼 — qty-box와 동일 높이 */
+  .note-btn { height:28px; line-height:28px; font-size:11px; padding:0 8px; min-width:50px; border-radius:4px; }
+
+  /* ── 모바일 열 고정: 번호·제품명 sticky ── */
+  .main-table { border-collapse:separate; border-spacing:0; }
+  .main-table thead th:nth-child(1),
+  .main-table thead th:nth-child(2) { position:sticky; z-index:3; background:#F5F5F5; }
+  .main-table thead th:nth-child(1) { left:0; width:20px; min-width:20px; }
+  .main-table thead th:nth-child(2) { left:20px; min-width:75px; border-right:2px solid #bbb; }
+  .main-table tbody td:nth-child(1),
+  .main-table tbody td:nth-child(2) { position:sticky; z-index:2; background:#fff; }
+  .main-table tbody td:nth-child(1) { left:0; width:20px; min-width:20px; }
+  .main-table tbody td:nth-child(2) { left:20px; min-width:75px; background:#fff; border-right:2px solid #bbb; }
+  .main-table tr.data-row:hover td:nth-child(1),
+  .main-table tr.data-row:hover td:nth-child(2) { background:#f0f6ff; }
+
+  /* 팝업 모달 */
+  .modal { width:96vw!important; max-width:96vw!important; margin:0 auto; }
+  .modal-header { padding:10px 12px 8px; }
+  .modal-title { font-size:12px; }
+  .modal-body { padding:10px 12px; }
+  .modal-footer { padding:8px 12px; gap:5px; }
+  .btn-save, .btn-cancel, .btn-danger { font-size:11px; padding:0 12px; height:30px; }
+
+  /* 결산 탭 */
+  .sett-tab { padding:7px 9px; font-size:10px; }
+
+  /* 결산 기간 바 */
+  .sett-period-bar { padding:7px 10px; gap:5px; }
+  .sett-mode-btn { padding:0 9px; font-size:10px; height:28px; }
+  .sett-date-range input[type=date] { font-size:10px; padding:0 5px; height:28px; }
+  .sett-apply-btn { padding:0 9px; font-size:10px; height:28px; }
+  .sett-period-info { font-size:9px; }
+
+  /* 분류 레이블 */
+  .cat-label { font-size:10px; }
+
+  /* ── 수량 입력 열 간격 (JS 인라인 padding 재정의) ── */
+  .main-table td[style*="padding:3px 2px"],
+  .main-table td[style*="padding: 3px 2px"] {
+    padding: 5px 10px !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-left">
+    <span class="logo-badge">생</span>
+    <div>
+      <div class="header-title">제품 생산 및 출고 일지</div>
+      <div class="header-sub" id="headerSub"></div>
+    </div>
+  </div>
+  <div id="cloudBadge" style="font-size:11px;color:#888;display:flex;align-items:center;margin-right:4px;"></div>
+  <div class="header-right">
+    <button class="btn btn-secondary" onclick="openAccum()">📈 누적 집계</button>
+    <button class="btn btn-secondary" onclick="openSettlement()">📊 결산</button>
+    <button class="btn btn-secondary" onclick="openRecord()">📋 기록</button>
+    <button class="btn btn-secondary" onclick="openSettings()">⚙ 설정</button>
+  </div>
+</div>
+
+<!-- Summary -->
+<div class="summary-section">
+  <div class="summary-cards">
+    <div class="summary-card"><div class="summary-card-label">오늘 입력 항목</div><div class="summary-card-value" id="sc0">0</div></div>
+    <div class="summary-card"><div class="summary-card-label">총 생산 합계</div><div class="summary-card-value" id="sc1">0</div></div>
+    <div class="summary-card"><div class="summary-card-label">총 출고 합계</div><div class="summary-card-value" id="sc2">0</div></div>
+    <div class="summary-card"><div class="summary-card-label">누적 저장일</div><div class="summary-card-value" id="sc3">0</div></div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div class="controls">
+  <div class="date-area">
+    <span style="font-size:12px;color:#555;">📅 날짜</span>
+    <input type="date" class="date-input" id="dateInput" value="">
+
+  </div>
+  <div style="font-size:11px;color:#555;">자동저장: <strong id="autoSaveLabel" style="color:#1976D2;">활성</strong>
+    &nbsp;<label class="toggle" style="vertical-align:middle;"><input type="checkbox" id="autoSaveToggle" checked onchange="toggleAutoSave()"><span class="slider"></span></label>
+  </div>
+</div>
+
+<!-- Notice -->
+<div class="notice-banner">✱ 각 항목 출고 수량 입력 후 '저장' 눌러 주세요</div>
+
+<!-- Cat grid -->
+<div class="cat-section">
+  <div class="cat-label">📋 분류 선택 — 탭을 클릭하면 해당 분류 품목만 표시됩니다</div>
+  <div class="cat-grid" id="catGrid"></div>
+</div>
+
+<!-- Current cat bar -->
+<div class="current-cat-bar">
+  <div>📂 현재 분류: <strong id="currentCatLabel">도안(빵,파이1)</strong></div>
+  <div id="currentCatCount" style="color:#888;font-size:11px;"></div>
+</div>
+
+<!-- Table -->
+<div class="table-section">
+  <!-- 색상 선택 툴바 -->
+  <div class="color-picker-bar" id="colorPickerBar" style="margin-bottom:8px;">
+    <span class="color-picker-label">🎨 셀 색상:</span>
+    <div class="color-swatch" style="background:#FFE0E0;" data-color="#FFE0E0" onclick="selectColor(this)" title="연한 빨강"></div>
+    <div class="color-swatch" style="background:#FFD0A0;" data-color="#FFD0A0" onclick="selectColor(this)" title="연한 주황"></div>
+    <div class="color-swatch" style="background:#FFFACD;" data-color="#FFFACD" onclick="selectColor(this)" title="연한 노랑"></div>
+    <div class="color-swatch" style="background:#D4EDDA;" data-color="#D4EDDA" onclick="selectColor(this)" title="연한 초록"></div>
+    <div class="color-swatch" style="background:#CCE5FF;" data-color="#CCE5FF" onclick="selectColor(this)" title="연한 파랑"></div>
+    <div class="color-swatch" style="background:#E2D9F3;" data-color="#E2D9F3" onclick="selectColor(this)" title="연한 보라"></div>
+    <div class="color-swatch" style="background:#F8D7DA;" data-color="#F8D7DA" onclick="selectColor(this)" title="분홍"></div>
+    <div class="color-swatch" style="background:#D1ECF1;" data-color="#D1ECF1" onclick="selectColor(this)" title="하늘"></div>
+    <div class="color-swatch" style="background:#FFF3CD;" data-color="#FFF3CD" onclick="selectColor(this)" title="크림"></div>
+    <div class="color-swatch" style="background:#E2E3E5;" data-color="#E2E3E5" onclick="selectColor(this)" title="회색"></div>
+    <div class="color-swatch-clear" onclick="clearColor()" title="색상 제거">✕</div>
+    <span class="color-picker-hint" id="colorPickerHint">제품명 또는 입력칸을 먼저 클릭하세요</span>
+  </div>
+  <div class="table-header">
+    <div class="table-title">| 수량 입력 (단위: 개)</div>
+    <div class="table-actions">
+      <button class="btn-small" onclick="openEditItems()">✏ 목록·항목 수정</button>
+      <button class="btn-small btn-orange" onclick="confirmReset()">+ 초기화</button>
+      <button class="btn-small btn-green" onclick="exportCSV()">↓ CSV</button>
+      <button class="btn-small btn-blue" onclick="saveData()">💾 저장</button>
+    </div>
+  </div>
+  <table class="main-table">
+    <thead>
+      <tr>
+        <th style="width:28px;"></th>
+        <th class="col-product">제품명</th>
+        <th style="background:#FFF9C4;white-space:nowrap;min-width:80px;">판매가(원)</th>
+        <th>둔산점</th>
+        <th>갤러리아점</th>
+        <th>도안점</th>
+        <th>유성점</th>
+        <th>건양대점</th>
+        <th>둔곡점</th>
+        <th style="background:#FFEBEE;">포장실</th>
+        <th>비고</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     팝업 1: 목록·항목 수정
+════════════════════════════════════════════ -->
+<div class="overlay" id="editOverlay" onclick="overlayClick(event,'editOverlay')">
+  <div class="modal" style="width:440px;">
+    <div class="modal-header">
+      <div><div class="modal-title" id="editModalTitle">📂 품목 수정</div><div class="modal-sub">추가·삭제·이름 수정 후 저장하세요</div></div>
+      <button class="modal-close" onclick="closeModal('editOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:10px;color:#aaa;margin-bottom:6px;">⠿ 드래그로 순서 변경 &nbsp;|&nbsp; 아래에서 원하는 위치에 추가</div>
+      <ul class="item-list" id="editItemList"></ul>
+      <div id="editEmpty" class="empty-msg" style="display:none;">품목이 없습니다. 아래에서 추가하세요.</div>
+      <div class="add-section">
+        <div class="add-section-title">✚ 새 품목 추가</div>
+        <div class="add-main-row">
+          <input type="text" class="add-input" id="addItemInput" placeholder="품목명 입력 후 추가 또는 Enter">
+          <button class="add-btn" onclick="addItem()">+ 추가</button>
+        </div>
+        <div class="add-pos-row">
+          <span class="add-pos-label">삽입 위치:</span>
+          <input type="number" class="add-pos-input" id="addPosInput" min="1" placeholder="번호">
+          <span class="add-pos-hint">번째 앞에 삽입 (비우면 맨 아래에 추가)</span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('editOverlay')">취소</button>
+      <button class="btn-save" onclick="saveItems()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     팝업 2: 초기화 확인
+════════════════════════════════════════════ -->
+<div class="overlay" id="resetOverlay" onclick="overlayClick(event,'resetOverlay')">
+  <div class="modal" style="width:360px;">
+    <div class="modal-header">
+      <div><div class="modal-title" style="color:#e53935;">⚠ 초기화 확인</div></div>
+      <button class="modal-close" onclick="closeModal('resetOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;line-height:1.7;color:#555;">
+        현재 분류 <strong id="resetCatName" style="color:#1976D2;"></strong>의<br>
+        모든 입력값(수량)을 <strong style="color:#e53935;">0으로 초기화</strong>합니다.<br>
+        이 작업은 되돌릴 수 없습니다.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('resetOverlay')">취소</button>
+      <button class="btn-danger" onclick="doReset()">초기화</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     팝업 3: 메모 입력
+════════════════════════════════════════════ -->
+<div class="overlay" id="memoOverlay" onclick="overlayClick(event,'memoOverlay')">
+  <div class="modal" style="width:380px;">
+    <div class="modal-header">
+      <div><div class="modal-title">📝 메모 입력</div><div class="modal-sub" id="memoProductName"></div></div>
+      <button class="modal-close" onclick="closeModal('memoOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <textarea class="memo-textarea" id="memoText" placeholder="메모를 입력하세요..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('memoOverlay')">취소</button>
+      <button class="btn-save" onclick="saveMemo()">✓ 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     팝업 4: 기록
+════════════════════════════════════════════ -->
+<div class="overlay" id="recordOverlay" onclick="overlayClick(event,'recordOverlay')">
+  <div class="modal" style="width:640px;">
+    <div class="modal-header">
+      <div><div class="modal-title">📋 저장 기록</div><div class="modal-sub">저장된 날짜별 데이터입니다</div></div>
+      <button class="modal-close" onclick="closeModal('recordOverlay')">✕</button>
+    </div>
+    <div class="modal-body" id="recordBody" style="min-height:200px;"></div>
+    <div class="modal-footer">
+      <button class="btn-danger" onclick="clearAllRecords()">🗑 전체 삭제</button>
+      <button class="btn-cancel" onclick="closeModal('recordOverlay')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     팝업 5: 설정
+════════════════════════════════════════════ -->
+<div class="overlay" id="settingsOverlay" onclick="overlayClick(event,'settingsOverlay')">
+  <div class="modal" style="width:400px;">
+    <div class="modal-header">
+      <div><div class="modal-title">⚙ 설정</div></div>
+      <button class="modal-close" onclick="closeModal('settingsOverlay')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:8px;">
+        <div><div class="setting-label">☁️ 클라우드 동기화 설정</div><div class="setting-desc">JSONBin.io 무료 계정으로 모든 기기에서 자동 동기화</div></div>
+        <div style="width:100%;background:#f8f9fa;border-radius:6px;padding:10px;font-size:11px;color:#555;line-height:1.7;">
+          <b>동기화 방식:</b> Firebase Realtime DB SSE 스트리밍<br>
+          입력 즉시 다른 기기에 반영 (약 100~300ms)<br>
+          셀 단위 개별 저장 → 동시 입력 시 충돌 없음<br><br>
+          <b>설정 방법:</b><br>
+          1. <a href="https://jsonbin.io" target="_blank" style="color:#1976D2;">jsonbin.io</a> 접속 → 무료 회원가입<br>
+          2. 우상단 API Keys → Master Key 복사<br>
+          3. Bins → Create a Bin 클릭 → Bin ID 복사<br>
+          4. 아래에 붙여넣기 후 저장
+        </div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:#555;width:70px;flex-shrink:0;">API Key</span>
+            <input type="password" id="inputApiKey" placeholder="$2a$10$..." style="flex:1;border:1px solid #ccc;border-radius:4px;padding:5px 8px;font-size:11px;font-family:inherit;outline:none;">
+            <button onclick="toggleApiKeyVis()" style="padding:4px 8px;border:1px solid #ccc;border-radius:4px;background:#fff;cursor:pointer;font-size:10px;">👁</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:#555;width:70px;flex-shrink:0;">Bin ID</span>
+            <input type="text" id="inputBinId" placeholder="64a3b2c1e3a..." style="flex:1;border:1px solid #ccc;border-radius:4px;padding:5px 8px;font-size:11px;font-family:inherit;outline:none;">
+          </div>
+          <div style="display:flex;gap:6px;margin-top:4px;">
+            <button onclick="saveCloudSettings()" style="flex:1;padding:6px;background:#1976D2;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-family:inherit;">💾 저장</button>
+            <button onclick="testCloudConnection()" style="flex:1;padding:6px;background:#388E3C;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-family:inherit;">🔗 연결 테스트</button>
+            <button onclick="autoCreateBin()" style="flex:1;padding:6px;background:#F57C00;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-family:inherit;">✨ 자동 생성</button>
+          </div>
+          <div id="cloudStatus" style="font-size:10px;color:#888;min-height:16px;"></div>
+        </div>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">자동 저장</div><div class="setting-desc">입력 후 자동으로 데이터를 저장합니다</div></div>
+        <label class="toggle"><input type="checkbox" id="settingAutoSave" checked onchange="document.getElementById('autoSaveToggle').checked=this.checked;toggleAutoSave()"><span class="slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">날짜 표시 형식</div><div class="setting-desc">헤더에 표시되는 날짜 형식</div></div>
+        <select id="dateFmtSelect" onchange="updateHeaderDate()">
+          <option value="kr">2026년 03월 16일</option>
+          <option value="slash">2026/03/16</option>
+          <option value="dash">2026-03-16</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">누적 저장일 초기화</div><div class="setting-desc">저장일 카운트를 0으로 리셋합니다</div></div>
+        <button class="btn-danger" onclick="resetSavedDays()" style="font-size:11px;">초기화</button>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">모든 데이터 초기화</div><div class="setting-desc">저장된 모든 기록과 품목을 삭제합니다</div></div>
+        <button class="btn-danger" onclick="resetAllData()" style="font-size:11px;">전체 초기화</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-save" onclick="closeModal('settingsOverlay')">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     팝업 8: 누적 집계
+════════════════════════════════════════════ -->
+<div class="overlay" id="accumOverlay" onclick="overlayClick(event,'accumOverlay')">
+  <div class="modal" style="width:98vw;max-width:1200px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">📈 누적 집계 — 지점별 기간 합산</div>
+        <div class="modal-sub" id="accumSubLabel">기간 내 각 지점에 입력된 수량을 제품별로 합산합니다</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('accumOverlay')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0;max-height:82vh;overflow-y:auto;">
+      <!-- 기간 필터 바 -->
+      <div style="padding:10px 16px;background:#F8F9FA;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:10;">
+        <span style="font-size:11px;color:#555;font-weight:600;white-space:nowrap;">📅 기간:</span>
+        <button class="sett-mode-btn active" id="accumModeMonth" onclick="setAccumMode('month')">한 달 전체</button>
+        <button class="sett-mode-btn" id="accumModeRange" onclick="setAccumMode('range')">기간 지정</button>
+        <!-- 한 달 전체 -->
+        <div id="accumMonthArea" style="display:flex;align-items:center;gap:6px;">
+          <select id="accumYearSel" onchange="applyAccumMonth()" style="border:1px solid #ccc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:inherit;background:#fff;outline:none;"></select>
+          <select id="accumMonthSel" onchange="applyAccumMonth()" style="border:1px solid #ccc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:inherit;background:#fff;outline:none;">
+            <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option>
+            <option value="04">4월</option><option value="05">5월</option><option value="06">6월</option>
+            <option value="07">7월</option><option value="08">8월</option><option value="09">9월</option>
+            <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+          </select>
+        </div>
+        <!-- 기간 지정 -->
+        <div id="accumRangeArea" style="display:none;align-items:center;gap:6px;">
+          <input type="date" id="accumFromDate" style="border:1px solid #ccc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:inherit;outline:none;background:#fff;">
+          <span style="font-size:11px;color:#888;">~</span>
+          <input type="date" id="accumToDate" style="border:1px solid #ccc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:inherit;outline:none;background:#fff;">
+          <button class="sett-apply-btn" onclick="applyAccumRange()">조회</button>
+        </div>
+        <span class="sett-period-info" id="accumPeriodInfo"></span>
+        <!-- 분류 필터 -->
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <span style="font-size:11px;color:#555;font-weight:600;">📂 분류:</span>
+          <select id="accumCatFilter" onchange="renderAccum()" style="border:1px solid #ccc;border-radius:4px;padding:4px 8px;font-size:11px;font-family:inherit;background:#fff;outline:none;max-width:180px;"></select>
+        </div>
+      </div>
+      <!-- 집계 테이블 -->
+      <div id="accumContent" style="padding:16px;overflow-x:auto;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-save" style="background:#1976D2;" onclick="exportAccumCSV()">↓ CSV 내보내기</button>
+      <button class="btn-cancel" onclick="closeModal('accumOverlay')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════
+     팝업 7: 결산
+════════════════════════════════════════════ -->
+<div class="overlay" id="settlementOverlay" onclick="overlayClick(event,'settlementOverlay')">
+  <div class="modal" style="width:860px;max-width:98vw;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">📊 지점별 한달 결산</div>
+        <div class="modal-sub" id="settlementMonthLabel">각 지점의 제품별 출고량 × 판매가 기준 결산</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('settlementOverlay')">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0;max-height:78vh;overflow-y:auto;">
+      <!-- 탭 -->
+      <div style="display:flex;border-bottom:2px solid #e0e0e0;background:#fafafa;position:sticky;top:0;z-index:10;">
+        <button class="sett-tab active" id="sttab-도안점"   onclick="selectSettTab('도안점')">🏪 도안점</button>
+        <button class="sett-tab"        id="sttab-둔산점"   onclick="selectSettTab('둔산점')">🏪 둔산점</button>
+        <button class="sett-tab"        id="sttab-갤러리아점" onclick="selectSettTab('갤러리아점')">🏪 갤러리아점</button>
+      </div>
+      <!-- 기간 필터 바 -->
+      <div class="sett-period-bar" style="position:sticky;top:43px;z-index:9;">
+        <span class="sett-period-label">📅 기간:</span>
+        <button class="sett-mode-btn active" id="settModeMonth" onclick="setSettMode('month')">한 달 전체</button>
+        <button class="sett-mode-btn" id="settModeRange" onclick="setSettMode('range')">기간 지정</button>
+        <!-- 한 달 전체: 연도·월 선택 -->
+        <div class="sett-date-range" id="settMonthArea" style="display:flex;">
+          <select id="settYearSel" onchange="applySettMonth()" style="border:1px solid #ccc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:inherit;background:#fff;outline:none;"></select>
+          <select id="settMonthSel" onchange="applySettMonth()" style="border:1px solid #ccc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:inherit;background:#fff;outline:none;">
+            <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option>
+            <option value="04">4월</option><option value="05">5월</option><option value="06">6월</option>
+            <option value="07">7월</option><option value="08">8월</option><option value="09">9월</option>
+            <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+          </select>
+        </div>
+        <!-- 기간 지정 -->
+        <div class="sett-date-range" id="settRangeArea" style="display:none;">
+          <input type="date" id="settFromDate">
+          <span class="sett-range-sep">~</span>
+          <input type="date" id="settToDate">
+          <button class="sett-apply-btn" onclick="applySettRange()">조회</button>
+        </div>
+        <span class="sett-period-info" id="settPeriodInfo"></span>
+      </div>
+      <div id="settlementContent" style="padding:16px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-save" style="background:#1976D2;" onclick="exportSettlementCSV()">↓ CSV 내보내기</button>
+      <button class="btn-cancel" onclick="closeModal('settlementOverlay')">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// 데이터 초기화
+// ══════════════════════════════════════════
+const CATS = [
+  "도안(빵,파이1)","도안(빵,파이2)","도안(케익)",
+  "공방","마카롱,다쿠아즈","쿠키,쨈",
+  "둔산(빵,파이1)","둔산(빵,파이2)","둔산(케익)",
+  "갤러리아(빵,파이1)","갤러리아(빵,파이2)","갤러리아(케익)"
+];
+
+const COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
+
+// ── 판매가 (제품명 → 원) ──
+let PRICES = {};
+function loadPrices()  {
+  try {
+    // production_log(3) 키
+    const s = localStorage.getItem('priceData');
+    if (s) PRICES = JSON.parse(s);
+    // production_log(1) 키 — 없으면 병합 시도
+    const legacy = localStorage.getItem('customPrices');
+    if (legacy) {
+      const lp = JSON.parse(legacy);
+      // 기존에 없는 항목만 추가 (덮어쓰기 방지)
+      Object.keys(lp).forEach(k => { if (!PRICES[k]) PRICES[k] = lp[k]; });
+      // 통합된 데이터를 priceData에 저장
+      localStorage.setItem('priceData', JSON.stringify(PRICES));
+    }
+  } catch(e) {}
+}
+function savePrices()  { try { localStorage.setItem('priceData', JSON.stringify(PRICES)); } catch(e){} }
+loadPrices();
+
+// 분류별 품목 (로컬스토리지에서 불러오거나 기본값)
+function defaultCatData() {
+  return {
+    "도안(빵,파이1)": ["크랜베리롤치즈캄파뉴","콘치즈캄파뉴","감자치아바타","올리브치아","넛츠스틱","모닝빵","파이만주","마늘홀릭","뽀드득소세지","야채소세지빵","명장팥빵","소금빵","스트링치즈소금빵","커피번","에그타르트","모카빵","소보로빵","팥고구마식빵","에그소금빵","무화과치아바타","바질토마토","명란소금빵","올리브베이글","블루베리베이글","명란파빵","양파빵","쌀캄파뉴","무가당빵(팥)","무가당빵(듀럼)","무가당빵(코코넛)","올리브맛도리","피자부어스트","초코바게트","모짜파니니","찹쌀떡 품은 소금빵"],
+    "도안(빵,파이2)": ["못난이녹차인절미","찹쌀꽈배기","어니언베이글","추억의밤모스","애플데니쉬","몽블랑","쑥설기","츄러스","쪽파프리글","생도넛","갈릭몽블랑","야끼소바","우유폭탄","계절과일팡도르","화이트롤","시나몬브레드","레몬시트롱","메론크림빵","초코소라빵","라구피자","오키나와","모구모구 화이트","모구모구 초코","말차인절미","딸기모찌","초코 산딸기","계절과일 몽블랑","계절과일 크로와상","두바이 쫀득 쿠키","생크림 모카번","두바이 에그타르트","슈크림 붕어빵","딸기 품은 크붕이","가나슈 초코 바게트","식빵러스크(체크만)","마늘빵(체크만)"],
+    "도안(케익)": ["계절생크림1호","계절생크림2호","계절생크림3호","토끼","블루베리케익","쇼콜라하트케익","키리쉬1호","키리쉬2호","키리쉬3호","딸기밭","쌀로만든과일밭","모둠타르트","초코밭테디","제리의 치즈케이크","하레치즈 케이크","순수우유롤(H)","순수우유롤(P)","순수망고롤(H)","순수망고롤(P)","미니티라미스","미니딸기티라미스","미니망고티라","미니크림치즈과일타르트","제리치즈(조각)","미니 아메르","더블치즈케이크","마시멜로우 속 캬또","꿈씨의포근하레","미니과일밭","미니키리쉬","딸망밭","두바이 마시멜로우","두바이 딸기범벅"],
+    "공방": ["닭가슴살 샐러드","매콤닭가슴살 샌드위치","비어햄 샌드위치","반미 샌드위치","에그&햄 샌드위치","에그 샌드위치","햄 샌드위치","포카치아 샌드위치","두부치아바타 버거","햄치즈 치아바타","새우바질페스토치아바타","치키BBQ치아바타","우유식빵","하레식빵","48시간 호밀빵","통밀빵","햄에그토스트","호두과자","하레치즈","100%호밀빵","초코모찌롤","바게트","호두바게트","레몬시트롱","휘낭시에","호두찰식빵","크로와상","파니니","어니언베이글","버터떡"],
+    "마카롱,다쿠아즈": ["마카롱류","버터롤","모카롤","호두파운드","오렌지파운드","쇼콜라오랑쥬","찹쌀카스테라","팥카스테라","아몬드캬라멜파운드","벌꿀카스테라","우유모찌롤","초코모찌롤","말차모찌롤","파네토네","호두쉬폰","쌀쉬폰","밀봉","초코우유마들렌","우유마들렌","쌀치즈카스테라","대전샌드 카라멜","대전샌드 딸기","밀크스틱","호두과자","휘낭시에","레몬시트롱","미니당근","미니초코산딸기","미니오렌지살구","미니살라망드","식빵러스크","하레러스크","아그작러스크"],
+    "쿠키,쨈": ["곰돌이쿠키","하트쿠키","복샌드쿠키","말쿠키","브로드네쥬","코코넛쿠키","로얄쇼콜라","세자무","샤브레","초코샤브레","쉘","뽀로","땅콩쿠키","쇼콜라프로겐트","치즈스틱","크랜베리쿠키","바통","모카초코칩쿠키","오트밀초코쿠키","카페브릭","메종쿠키","샤브레티쿠키","생초콜릿(다크)","쑥인절미","하레치즈볼","병딸기쨈","쫀득쿠키"],
+    "둔산(빵,파이1)": ["감자치아바타","올리브치아바타","미니쌀식빵","우유식빵","팡도미","통밀식빵","크랜베리식빵","로겐호밀빵","공주알밤식빵","모닝빵","애플파이","크로와상","레몬크로와상","소금빵","어니언베이글","추억의밤모스","명장팥빵","버터크림빵","야채소세지빵","갈릭토스트","우유마들렌","초코우유마들렌","우유폭탄","생도넛","바질소금빵","야끼소바빵","감자베이컨","쌀치즈카스테라","살라망드","뽀로","쉘","러스크","생크림커피번","빵오초코","명란감자빵","쨈치즈꼬다리","완두앙금빵","초코가나슈빵","딸기붕어","슈크림붕어","딸기모찌","두바이 에그타르트","두바이 쫀득 쿠키","쌀단팥빵"],
+    "둔산(빵,파이2)": ["몽블랑","못난이녹차인절미","뽀드득소세지","마늘홀릭","파이만주","플레인스콘","얼그레이스콘","찹쌀꽈배기","고로케","소보로","팥도넛","커피번","바질토마토","연탄빵","에그타르트","사과크럼블타르트","쪽파프리글","어니언크림","명란소금빵","리얼우유크림도넛","시나몬브레드","단짠단짠양파빵","블루베리치즈번","쫀득감자빵","갈릭소세지데니쉬","깜빵","계절과일팡도르","메론크림빵","찰옥수수빵","쌀꽈배기","태산앙금팥빵","딸기파이","고구마듬뿍페스츄리","월넛크림브레드","무가담빵","쌀캄파뉴","포카치아샌드위치","모구모구","초코 모구모구"],
+    "둔산(케익)": ["계절생크림1호","계절생크림2호","계절생크림3호","강아지케이크","곰돌이케이크","망고밭","블루베리케익","키리쉬1호","키리쉬2호","키리쉬3호","쇼콜라하트케익","딸기밭","크림치즈딸기타르트","쌀로만든딸기밭","미니망고","쇼콜라테디","크럼블레어","망고케이크","커피카라멜","제리의 치즈케이크","딸기몽블랑","그래놀라요거트","생체리초코케이크","체리치즈(조각)","피치요거트케이크","요거! 귤 케이크","미니! 귤 케이크","무화과케이크","초코쏙테디","딸망밭","쁘띠초코밭","쌀과일밭","모둠타르트","미니피치","샤인밭","미니망고","미니망고티라","미니티라","미니딸기티라","눈사람","고백하레"],
+    "갤러리아(빵,파이1)": ["크랜베리롤치즈캄파뉴","감자치아바타","올리브치아바타","쌀식빵","우유식빵","팡도미식빵","공주알밤식빵","모닝빵","소금빵","애플파이","크로와상","시나몬 브레드","마늘홀릭","어니언크림치즈","몽블랑","추억의맘모스빵","커피번","통밀식빵","롱뽀드득 소시지","햄치즈명란마요","바질토마토","단팥빵","야채소세지빵","파이만쥬","에그타르트","초코 마들렌","우유 마들렌","코코팡","쌀꽈배기","쪽파프리글","우유 폭탄","새우바질페스토치아바타","치킨BBQ치아바타","햄치즈 치아바타","야끼소바","에그소금빵","앙버터소금빵","할라피뇨/페페로니 프레첼","무화과 치아바타","소보로빵","양파빵","슈크림 브레산","메론빵","갈릭 베이컨","올리브 베이글","시금치 베이글","블루베리 베이글"],
+    "갤러리아(빵,파이2)": ["라구피자","당근라페 샌드위치","구름빵","연탄빵","옥수수빵","명란바게트","매콤칠리소세지","무가당 쌀캄파뉴","레몬시트롱","딸기크로와상","모구모구 화이트","모구모구 초코","두바이 쫀득 쿠키","두바이 에그타르트","땅콩 쿠키","바통쿠키"],
+    "갤러리아(케익)": ["계절생크림1호","계절생크림2호","키리쉬1호","키리쉬2호","딸기밭","딸망밭","쌀딸기밭","블루베리","초코밭테디","쇼콜라하트","미니망고티라미스","미니티라미스","미니딸기티라미스","미니밤티라미스","딸크치","초코테디","치즈테디","홀케이크","쁘띠케이크"],
+  };
+}
+
+function loadCatData() {
+  try {
+    const s = localStorage.getItem('catData');
+    if (s) return JSON.parse(s);
+  } catch(e) {}
+  return defaultCatData();
+}
+function saveCatData() {
+  try { localStorage.setItem('catData', JSON.stringify(catData)); } catch(e) {}
+}
+
+// ══════════════════════════════════════════
+// Firebase Realtime Database 동기화 (v2)
+// ── SSE 실시간 스트리밍 + 세분화 경로 저장 ──
+// ══════════════════════════════════════════
+const FB_URL = 'https://project-production-log-default-rtdb.firebaseio.com';
+
+// 클라이언트 고유 ID (탭 구별용 — 자신이 쓴 변경은 SSE에서 무시)
+const _clientId = Math.random().toString(36).slice(2, 8) + '_' + Date.now().toString(36);
+
+// ── 경로별 독립 잠금 맵 (경로 충돌 방지) ──
+const _pathLocks  = {};   // path → true/false
+const _pathQueues = {};   // path → 최신 대기 값
+
+// 단일 경로에 PUT (가장 작은 단위 저장 — 동시 경쟁 없음)
+async function _putPath(path, value) {
+  const url = FB_URL + path + '.json';
+  if (_pathLocks[path]) {
+    _pathQueues[path] = value;
+    return true;
+  }
+  _pathLocks[path] = true;
+  let ok = false;
+  try {
+    const r = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(value)
+    });
+    ok = r.ok;
+  } catch(e) { ok = false; }
+  finally {
+    _pathLocks[path] = false;
+    if (_pathQueues[path] !== undefined) {
+      const next = _pathQueues[path];
+      delete _pathQueues[path];
+      // 대기 중인 최신 값을 이어서 반영 (지연 없음)
+      _putPath(path, next);
+    }
+  }
+  return ok;
+}
+
+// ── 낙관적 PATCH (여러 최상위 필드 동시 업데이트 — 기존 호환용) ──
+let _saveLock  = false;  // 하위 호환: cloudSave 직렬화용
+let _saveQueue = null;
+
+function _buildSavePayload(data) {
+  const payload = Object.assign({}, data);
+  if (Array.isArray(payload.records) && payload.records.length === 0) {
+    payload.records = null; payload._recordsCleared = Date.now();
+  } else { payload._recordsCleared = null; }
+  // 색상은 날짜별 중첩 구조 — 최상위가 날짜 키이므로 null 처리 제거 (날짜별 독립)
+  if (payload.prices && Object.keys(payload.prices||{}).length === 0) {
+    payload.prices = null; payload._pricesCleared = Date.now();
+  } else { payload._pricesCleared = null; }
+  payload._v   = Date.now();
+  payload._cid = _clientId;
+  return payload;
+}
+
+async function cloudSave(data) {
+  if (_saveLock) { _saveQueue = data; return true; }
+  _saveLock = true; _saveQueue = null;
+  let ok = false;
+  try {
+    const payload = _buildSavePayload(data);
+    const r = await fetch(FB_URL + '/data.json', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    ok = r.ok;
+  } catch(e) { ok = false; }
+  finally {
+    _saveLock = false;
+    if (_saveQueue) {
+      const next = _saveQueue; _saveQueue = null;
+      // 대기 데이터 즉시 처리 (지연 없음)
+      cloudSave(next);
+    }
+  }
+  return ok;
+}
+
+// ── 전체 로드 (초기 1회) ──
+async function cloudLoad() {
+  try {
+    const r = await fetch(FB_URL + '/data.json');
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j || null;
+  } catch(e) { return null; }
+}
+
+// ════════════════════════════════════════════
+// 세분화 경로 저장 함수들
+// (inputData의 특정 셀 1개만 PUT → 다른 사용자 데이터와 충돌 없음)
+// ════════════════════════════════════════════
+
+// 입력값 단일 셀 저장: /data/inputData/날짜/분류/제품명/컬럼
+function cloudPushCell(dateKey, cat, name, col, val) {
+  // Firebase key에 사용 불가 문자 인코딩 (., $, #, [, ], /)
+  const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+  const path = `/data/inputData/${esc(dateKey)}/${esc(cat)}/${esc(name)}/${esc(col)}`;
+  return _putPath(path, val === 0 ? null : val);
+}
+
+// 판매가 단일 항목 저장
+function cloudPushPrice(name, val) {
+  const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+  const path = `/data/prices/${esc(name)}`;
+  return _putPath(path, val || null);
+}
+
+// 색상 단일 키 저장 (날짜별 구조: type/날짜/키)
+// key는 이미 "날짜/원본키" 형태로 전달됨
+function cloudPushColor(type, key, val) {
+  // key = "2026-04-20/분류__제품명" 형태
+  // "/" 는 Firebase 경로 구분자이므로 이스케이프 제외
+  const escSeg = s => s.replace(/[.$#\[\]]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+  // key를 "/" 기준으로 분리하여 각 세그먼트만 이스케이프
+  const pathSegs = key.split('/').map(escSeg).join('/');
+  const path = `/data/${type}/${pathSegs}`;
+  return _putPath(path, val || null);
+}
+
+// 메모 단일 키 저장
+function cloudPushMemo(key, val) {
+  const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+  const path = `/data/memos/${esc(key)}`;
+  return _putPath(path, val || null);
+}
+
+// ════════════════════════════════════════════
+// SSE 실시간 스트리밍 (Firebase .json?&sse=true)
+// — 폴링 완전 제거, 변경 즉시 수신 (~100ms)
+// ════════════════════════════════════════════
+let _sseSource  = null;
+let _sseRetries = 0;
+const SSE_MAX_RETRY = 5;
+
+// SSE로 수신한 원격 변경을 로컬에 병합 (포커스 셀 보호)
+function _applyRemoteData(data) {
+  if (!data || typeof data !== 'object') return;
+
+  // 자신이 쓴 변경이면 무시 (에코 방지)
+  if (data._cid === _clientId) return;
+
+  const badge = document.getElementById('cloudBadge');
+  let changed = false;
+
+  // catData
+  if (data.catData && JSON.stringify(data.catData) !== JSON.stringify(catData)) {
+    catData = data.catData; saveCatData();
+    renderCatGrid(); renderMainTable(); updateCurrentBar(); changed = true;
+  }
+
+  // inputData — 포커스 셀 값 보호
+  if (data.inputData) {
+    const focused    = document.activeElement;
+    const fCat       = focused && focused.dataset && focused.dataset.cat;
+    const fName      = focused && focused.dataset && focused.dataset.name;
+    const fCol       = focused && focused.dataset && focused.dataset.col;
+    const dateKey    = getCurrentDateKey();
+    const merged     = JSON.parse(JSON.stringify(data.inputData));
+    if (fCat && fName && fCol) {
+      if (!merged[dateKey])              merged[dateKey] = {};
+      if (!merged[dateKey][fCat])        merged[dateKey][fCat] = {};
+      if (!merged[dateKey][fCat][fName]) merged[dateKey][fCat][fName] = {};
+      merged[dateKey][fCat][fName][fCol] =
+        (inputData[dateKey] && inputData[dateKey][fCat] && inputData[dateKey][fCat][fName])
+          ? (inputData[dateKey][fCat][fName][fCol] || 0) : 0;
+    }
+    if (JSON.stringify(merged) !== JSON.stringify(inputData)) {
+      inputData = merged; saveInputData(); changed = true;
+    }
+  }
+
+  // memos
+  if (data.memos && JSON.stringify(data.memos) !== JSON.stringify(memos)) {
+    memos = data.memos; saveMemos(); changed = true;
+  }
+
+  // records
+  const remRec = Array.isArray(data.records) ? data.records : [];
+  if (JSON.stringify(remRec) !== JSON.stringify(records)) {
+    records = remRec; saveRecords(); changed = true;
+  }
+
+  // prices
+  if (data.prices !== undefined) {
+    const np = data.prices || {};
+    if (JSON.stringify(np) !== JSON.stringify(PRICES)) {
+      PRICES = np; savePrices(); renderMainTable(); changed = true;
+    }
+  }
+
+  // productColors / qtyColors (날짜별 중첩 구조)
+  if (data.productColors !== undefined) {
+    const nc = data.productColors || {};
+    if (JSON.stringify(nc) !== JSON.stringify(productColors)) {
+      productColors = nc; saveProductColors(); changed = true;
+    }
+  }
+  if (data.qtyColors !== undefined) {
+    const nc = data.qtyColors || {};
+    if (JSON.stringify(nc) !== JSON.stringify(qtyColors)) {
+      qtyColors = nc; saveQtyColors(); changed = true;
+    }
+  }
+
+  // savedDays
+  if (typeof data.savedDays === 'number' && data.savedDays !== savedDays) {
+    savedDays = data.savedDays; saveSavedDays(); changed = true;
+  }
+
+  if (changed) {
+    renderMainTable(); updateSummary();
+    if (badge) badge.innerHTML = '☁️ <span style="color:#388E3C;">실시간 동기화 ✓</span>';
+    showToast('🔄 실시간 반영됨');
+  }
+}
+
+function _startSSE() {
+  if (_sseSource) { _sseSource.close(); _sseSource = null; }
+  const badge = document.getElementById('cloudBadge');
+
+  const url = FB_URL + '/data.json?&sse=true';
+  const es = new EventSource(url);
+  _sseSource = es;
+
+  es.addEventListener('put', e => {
+    _sseRetries = 0;
+    try {
+      const msg = JSON.parse(e.data);
+      // path === '/' → 전체 데이터 (초기 or reset)
+      // path === '/inputData/...' 등 → 하위 경로 변경
+      if (msg.path === '/') {
+        _applyRemoteData(msg.data);
+      } else {
+        // 하위 경로 변경: 로컬 데이터에 병합 후 applyRemoteData
+        const parts = msg.path.replace(/^\//, '').split('/');
+        const synthetic = JSON.parse(JSON.stringify({
+          catData, inputData, memos, records,
+          prices: PRICES, savedDays, productColors, qtyColors
+        }));
+        // 경로 디코딩 후 데이터 삽입
+        const decode = s => decodeURIComponent(s.replace(/%([0-9A-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h,16))));
+        const decodedParts = parts.map(decode);
+        let obj = synthetic;
+        for (let i = 0; i < decodedParts.length - 1; i++) {
+          const k = decodedParts[i];
+          if (obj[k] === undefined || typeof obj[k] !== 'object') obj[k] = {};
+          obj = obj[k];
+        }
+        const lastKey = decodedParts[decodedParts.length - 1];
+        if (msg.data === null) {
+          delete obj[lastKey];
+        } else {
+          obj[lastKey] = msg.data;
+        }
+        // _cid 체크를 위해 최상위 메타 보존
+        synthetic._cid = (msg.data && msg.data._cid) || '';
+        _applyRemoteData(synthetic);
+      }
+    } catch(err) {}
+  });
+
+  es.addEventListener('patch', e => {
+    _sseRetries = 0;
+    try {
+      const msg = JSON.parse(e.data);
+      // patch 이벤트도 동일하게 처리
+      const synthetic = JSON.parse(JSON.stringify({
+        catData, inputData, memos, records,
+        prices: PRICES, savedDays, productColors, qtyColors
+      }));
+      if (msg.path === '/' || msg.path === '') {
+        Object.assign(synthetic, msg.data || {});
+      } else {
+        const parts = msg.path.replace(/^\//, '').split('/');
+        const decode = s => decodeURIComponent(s.replace(/%([0-9A-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h,16))));
+        let obj = synthetic;
+        for (let i = 0; i < parts.length - 1; i++) {
+          const k = decode(parts[i]);
+          if (!obj[k] || typeof obj[k] !== 'object') obj[k] = {};
+          obj = obj[k];
+        }
+        const last = decode(parts[parts.length - 1]);
+        Object.assign(obj[last] || (obj[last] = {}), msg.data || {});
+      }
+      _applyRemoteData(synthetic);
+    } catch(err) {}
+  });
+
+  es.onerror = () => {
+    if (badge) badge.innerHTML = '☁️ <span style="color:#e53935;">재연결 중...</span>';
+    es.close(); _sseSource = null;
+    _sseRetries++;
+    const delay = Math.min(1000 * Math.pow(2, _sseRetries), 30000);
+    if (_sseRetries <= SSE_MAX_RETRY) {
+      setTimeout(_startSSE, delay);
+    } else {
+      if (badge) badge.innerHTML = '☁️ <span style="color:#e53935;">연결 실패 — 새로고침 필요</span>';
+    }
+  };
+
+  es.onopen = () => {
+    _sseRetries = 0;
+    if (badge) badge.innerHTML = '☁️ <span style="color:#388E3C;">실시간 연결 ✓</span>';
+  };
+}
+
+function loadInputData() {
+  try { const s=localStorage.getItem('inputData'); return s?JSON.parse(s):{}; } catch(e){return {};}
+}
+function saveInputData() { try{localStorage.setItem('inputData',JSON.stringify(inputData));}catch(e){} }
+function loadMemos() { try{ const s=localStorage.getItem('memos'); return s?JSON.parse(s):{}; }catch(e){return{};} }
+function saveMemos() { try{localStorage.setItem('memos',JSON.stringify(memos));}catch(e){} }
+function loadRecords()   { try{ const s=localStorage.getItem('records');   return s?JSON.parse(s):[]; }catch(e){return[];} }
+function saveRecords()   { try{localStorage.setItem('records',JSON.stringify(records));}catch(e){} }
+function loadSavedDays() { try{ const s=localStorage.getItem('savedDays'); return s?parseInt(s,10):0; }catch(e){return 0;} }
+function saveSavedDays() { try{localStorage.setItem('savedDays',String(savedDays));}catch(e){} }
+
+// ── 세분화 전체 저장: 각 데이터를 독립 경로에 PUT → 동시 저장 충돌 없음 ──
+async function saveAll() {
+  saveCatData(); saveInputData(); saveMemos(); saveRecords();
+  savePrices(); saveSavedDays(); saveProductColors(); saveQtyColors();
+  const results = await Promise.all([
+    _putPath('/data/catData',       catData),
+    _putPath('/data/inputData',     inputData),
+    _putPath('/data/memos',         Object.keys(memos).length ? memos : null),
+    _putPath('/data/prices',        Object.keys(PRICES).length ? PRICES : null),
+    _putPath('/data/savedDays',     savedDays),
+    _putPath('/data/productColors', Object.keys(productColors).length ? productColors : null),
+    _putPath('/data/qtyColors',     Object.keys(qtyColors).length ? qtyColors : null),
+  ]);
+  return results.every(Boolean);
+}
+
+// ── records 전용 안전 저장: 원격 최신본과 병합 후 PUT (동시 저장 누락 방지) ──
+async function _safePushRecords(newRecord) {
+  const path = '/data/records';
+  if (_pathLocks[path]) { _pathQueues[path] = newRecord; return true; }
+  _pathLocks[path] = true;
+  let ok = false;
+  try {
+    // 1) 원격 최신 records 읽기
+    const r = await fetch(FB_URL + path + '.json');
+    let remote = [];
+    if (r.ok) { const j = await r.json(); remote = Array.isArray(j) ? j : []; }
+    // 2) 로컬 + 원격 병합 (ts 기준 중복 제거)
+    const merged = [...records];
+    const localTs = new Set(merged.map(x => x.ts));
+    remote.forEach(x => { if (!localTs.has(x.ts)) merged.push(x); });
+    merged.sort((a, b) => (b.ts||0) - (a.ts||0));
+    // 3) 새 기록 추가
+    if (newRecord && !localTs.has(newRecord.ts)) merged.unshift(newRecord);
+    if (merged.length > 100) merged.length = 100;
+    records = merged;
+    saveRecords();
+    // 4) 병합 결과를 PUT
+    const wr = await fetch(FB_URL + path + '.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(records)
+    });
+    ok = wr.ok;
+  } catch(e) { ok = false; }
+  finally {
+    _pathLocks[path] = false;
+    if (_pathQueues[path] !== undefined) {
+      const next = _pathQueues[path];
+      delete _pathQueues[path];
+      _safePushRecords(next);
+    }
+  }
+  return ok;
+}
+
+async function loadFromCloud() {
+  const data = await cloudLoad();
+  if (!data) return false;
+  if (data.catData)   { catData = data.catData;     saveCatData(); }
+  if (data.inputData) { inputData = data.inputData; saveInputData(); }
+  if (data.memos)     { memos = data.memos;         saveMemos(); }
+  // records: null(Firebase 빈배열 저장) 또는 _recordsCleared 플래그 → 빈 배열로 처리
+  if (Array.isArray(data.records)) {
+    records = data.records; saveRecords();
+  } else if (data.records === null || data._recordsCleared) {
+    records = []; saveRecords();
+  }
+  if (typeof data.savedDays === 'number') {
+    savedDays = data.savedDays; saveSavedDays();
+  }
+  // prices: 항상 클라우드 우선 (빈 객체도 포함)
+  if (data.prices !== undefined && data.prices !== null) {
+    const legacy = localStorage.getItem('customPrices');
+    if (legacy) {
+      try {
+        const lp = JSON.parse(legacy);
+        Object.keys(lp).forEach(k => { if (!data.prices[k]) data.prices[k] = lp[k]; });
+      } catch(e) {}
+    }
+    PRICES = data.prices; savePrices();
+  } else if (data.prices === null || data._pricesCleared) {
+    PRICES = {}; savePrices();
+  }
+  if (data.productColors) { productColors = data.productColors || {}; saveProductColors(); }
+  if (data.qtyColors !== undefined) { qtyColors = data.qtyColors || {}; saveQtyColors(); }
+  return true;
+}
+
+let catData   = loadCatData();
+let catMeta   = {};
+let inputData = loadInputData();
+let memos     = loadMemos();
+let records   = loadRecords();
+let savedDays = loadSavedDays();
+
+let currentCat = CATS[0];
+let currentMemoKey = '';
+let autoSave = true;
+
+// ══════════════════════════════════════════
+// 렌더
+// ══════════════════════════════════════════
+function renderCatGrid() {
+  const grid = document.getElementById('catGrid');
+  grid.innerHTML = '';
+  CATS.forEach(cat => {
+    const cell = document.createElement('div');
+    cell.className = 'cat-cell' + (cat===currentCat?' active':'');
+    cell.innerHTML = `${cat}`;
+    cell.addEventListener('click', ()=>selectCat(cat));
+    grid.appendChild(cell);
+  });
+}
+
+function selectCat(cat) {
+  currentCat = cat;
+  renderCatGrid();
+  renderMainTable();
+  updateCurrentBar();
+}
+
+function updateCurrentBar() {
+  document.getElementById('currentCatLabel').textContent = currentCat;
+  document.getElementById('currentCatCount').textContent = '';
+}
+
+// ── 현재 선택된 날짜 키 반환 ──
+function getCurrentDateKey() {
+  return document.getElementById('dateInput').value || getTodayStr();
+}
+
+// ── 날짜별 독립 저장: inputData[date][cat][name][col] ──
+function getInput(cat, name, col) {
+  const d = getCurrentDateKey();
+  return (inputData[d]&&inputData[d][cat]&&inputData[d][cat][name]&&inputData[d][cat][name][col]!==undefined)
+    ? inputData[d][cat][name][col] : 0;
+}
+function setInput(cat, name, col, val) {
+  const d = getCurrentDateKey();
+  if(!inputData[d]) inputData[d]={};
+  if(!inputData[d][cat]) inputData[d][cat]={};
+  if(!inputData[d][cat][name]) inputData[d][cat][name]={};
+  inputData[d][cat][name][col] = val;
+}
+
+function renderMainTable() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+  const items = catData[currentCat] || [];
+
+  if (!items.length) {
+    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:24px;color:#aaa;">이 분류에 등록된 품목이 없습니다. '목록·항목 수정'으로 추가하세요.</td></tr>`;
+    updateSummary(); return;
+  }
+
+  items.forEach((name, i) => {
+    const tr = document.createElement('tr');
+    tr.className = 'data-row';
+    const memoKey = currentCat+'__'+name;
+    const hasMemo = memos[memoKey] ? '💬' : '';
+
+    let cells = `<td style="color:#aaa;font-size:10px;width:28px;">${String(i+1).padStart(2,'0')}</td>`;
+    const productColorKey = `${currentCat}__${name}`;
+    const dateKey = getCurrentDateKey();
+    const _pColors = getProductColorsForDate(dateKey);
+    const _qColors = getQtyColorsForDate(dateKey);
+    const savedProductBg = _pColors[productColorKey] || '';
+    cells += `<td class="col-product" data-product-key="${productColorKey}" style="${savedProductBg ? 'background:'+savedProductBg+';' : ''}" onclick="onProductCellClick(this)">${name}</td>`;
+
+    // 판매가 셀
+    const pv = PRICES[name] || 0;
+    const priceRo = isDateReadOnly() ? 'readonly disabled style="opacity:0.7;cursor:not-allowed;"' : '';
+    cells += `<td style="background:#FFFDE7;padding:0;min-width:80px;">
+      <input class="price-input" type="text" inputmode="numeric"
+        value="${pv > 0 ? pv.toLocaleString()+'원' : ''}" placeholder="—"
+        data-name="${name}" data-raw="${pv}"
+        ${priceRo}
+        onfocus="this.value=this.dataset.raw>0?this.dataset.raw:'';this.select();"
+        onblur="onPriceBlur(this)"
+        oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+    </td>`;
+
+    COLS.forEach((col, ci) => {
+      const v = getInput(currentCat, name, col);
+      const bg = ci===6 ? 'background:#FFF8F8;' : '';
+      const colorKey = `${currentCat}__${name}__${col}`;
+      const savedBg = _qColors[colorKey] || '';
+      const inlineStyle = savedBg ? `background:${savedBg};` : (ci===6 ? 'background:#FFF8F8;' : '');
+      const roAttr = isDateReadOnly() ? 'readonly disabled style="' + inlineStyle + 'opacity:0.7;cursor:not-allowed;"' : 'style="' + inlineStyle + '"';
+      cells += `<td style="${bg}padding:3px 2px;">
+        <input class="qty-box${savedBg?' color-selected':''}" type="number" min="0" value="${v}"
+          data-cat="${currentCat}" data-name="${name}" data-col="${col}"
+          data-color-key="${colorKey}"
+          ${roAttr}
+          onfocus="onQtyFocus(this)"
+          oninput="onInputChange(this)">
+      </td>`;
+    });
+
+    cells += `<td style="padding:3px 2px;"><button class="note-btn${hasMemo?' has-memo':''}" onclick="openMemo('${currentCat}','${name.replace(/'/g,"\\'")}','${memoKey.replace(/'/g,"\\'")}')">
+      ${hasMemo||'메모입력'}
+    </button></td>`;
+
+    tr.innerHTML = cells;
+    tbody.appendChild(tr);
+  });
+
+  updateSummary();
+}
+
+function onInputChange(el) {
+  const cat=el.dataset.cat, name=el.dataset.name, col=el.dataset.col;
+  const v = parseInt(el.value)||0;
+  setInput(cat, name, col, v);
+  updateSummary();
+  if (autoSave) {
+    saveInputData();
+    // 셀 단위 즉시 저장 — 디바운스 없음, 다른 사용자 데이터와 충돌 없음
+    cloudPushCell(getCurrentDateKey(), cat, name, col, v);
+  }
+}
+
+// ══════════════════════════════════════════
+// 수량 입력칸 색상 기능 (날짜별 독립 저장)
+// 구조: qtyColors[날짜][분류__제품명__컬럼]
+//       productColors[날짜][분류__제품명]
+// ══════════════════════════════════════════
+let qtyColors = JSON.parse(localStorage.getItem('qtyColors')||'{}');
+let productColors = JSON.parse(localStorage.getItem('productColors')||'{}');
+let _selectedQtyEl = null;
+let _selectedProductEl = null;
+let _activeColorSwatch = null;
+
+function saveQtyColors() { localStorage.setItem('qtyColors', JSON.stringify(qtyColors)); }
+function saveProductColors() { localStorage.setItem('productColors', JSON.stringify(productColors)); }
+
+// ── 구 형식 마이그레이션 (1회 실행)
+// 구 형식: { "분류__제품명__컬럼": "#색상코드" }
+// 신 형식: { "2026-04-20": { "분류__제품명__컬럼": "#색상코드" } }
+(function _migrateColorData() {
+  const n = new Date();
+  const today = n.getFullYear() + '-'
+    + String(n.getMonth()+1).padStart(2,'0') + '-'
+    + String(n.getDate()).padStart(2,'0');
+  const isDateKey = k => /^\d{4}-\d{2}-\d{2}$/.test(k);
+
+  // qtyColors 마이그레이션
+  if (Object.keys(qtyColors).some(k => !isDateKey(k))) {
+    const migrated = {};
+    Object.entries(qtyColors).forEach(([k, v]) => {
+      if (isDateKey(k)) { migrated[k] = v; }
+      else if (typeof v === 'string') {
+        if (!migrated[today]) migrated[today] = {};
+        migrated[today][k] = v;
+      }
+    });
+    qtyColors = migrated;
+    saveQtyColors();
+  }
+  // productColors 마이그레이션
+  if (Object.keys(productColors).some(k => !isDateKey(k))) {
+    const migrated = {};
+    Object.entries(productColors).forEach(([k, v]) => {
+      if (isDateKey(k)) { migrated[k] = v; }
+      else if (typeof v === 'string') {
+        if (!migrated[today]) migrated[today] = {};
+        migrated[today][k] = v;
+      }
+    });
+    productColors = migrated;
+    saveProductColors();
+  }
+})();
+
+// 현재 날짜의 qtyColors 맵 반환 (없으면 빈 객체)
+function getQtyColorsForDate(dateKey) {
+  return (qtyColors[dateKey] && typeof qtyColors[dateKey] === 'object') ? qtyColors[dateKey] : {};
+}
+// 현재 날짜의 productColors 맵 반환
+function getProductColorsForDate(dateKey) {
+  return (productColors[dateKey] && typeof productColors[dateKey] === 'object') ? productColors[dateKey] : {};
+}
+// 현재 날짜에 qtyColor 설정
+function setQtyColor(dateKey, key, color) {
+  if (!qtyColors[dateKey]) qtyColors[dateKey] = {};
+  if (color) qtyColors[dateKey][key] = color;
+  else delete qtyColors[dateKey][key];
+  saveQtyColors();
+}
+// 현재 날짜에 productColor 설정
+function setProductColor(dateKey, key, color) {
+  if (!productColors[dateKey]) productColors[dateKey] = {};
+  if (color) productColors[dateKey][key] = color;
+  else delete productColors[dateKey][key];
+  saveProductColors();
+}
+
+function onProductCellClick(el) {
+  // 이전 포커스 표시 제거
+  if (_selectedQtyEl) {
+    _selectedQtyEl.classList.remove('focus-target');
+    _selectedQtyEl = null;
+  }
+  if (_selectedProductEl && _selectedProductEl !== el) {
+    _selectedProductEl.style.outline = '';
+  }
+  _selectedProductEl = el;
+  el.style.outline = '2px solid #1976D2';
+  const hint = document.getElementById('colorPickerHint');
+  if (hint) hint.textContent = '색상 버튼을 클릭하세요';
+}
+
+function onQtyFocus(el) {
+  // 이전 포커스 표시 제거
+  if (_selectedQtyEl && _selectedQtyEl !== el) {
+    _selectedQtyEl.classList.remove('focus-target');
+  }
+  if (_selectedProductEl) {
+    _selectedProductEl.style.outline = '';
+    _selectedProductEl = null;
+  }
+  _selectedQtyEl = el;
+  el.classList.add('focus-target');
+  const hint = document.getElementById('colorPickerHint');
+  if (hint) hint.textContent = '색상 버튼을 클릭하세요';
+}
+
+function selectColor(swatchEl) {
+  const color = swatchEl.dataset.color;
+  // 스와치 활성화 표시
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+  swatchEl.classList.add('active');
+  _activeColorSwatch = swatchEl;
+
+  const dateKey = getCurrentDateKey();
+
+  if (_selectedProductEl) {
+    _selectedProductEl.style.background = color;
+    _selectedProductEl.style.outline = '';
+    const key = _selectedProductEl.dataset.productKey;
+    if (key) {
+      setProductColor(dateKey, key, color);
+      cloudPushColor('productColors', dateKey + '/' + key, color);
+    }
+    _selectedProductEl = null;
+    const hint = document.getElementById('colorPickerHint');
+    if (hint) hint.textContent = '색상이 적용되었습니다';
+    setTimeout(() => { if(hint) hint.textContent = '제품명 또는 입력칸을 먼저 클릭하세요'; }, 1500);
+  } else if (_selectedQtyEl) {
+    _selectedQtyEl.style.background = color;
+    _selectedQtyEl.classList.add('color-selected');
+    const key = _selectedQtyEl.dataset.colorKey;
+    if (key) {
+      setQtyColor(dateKey, key, color);
+      cloudPushColor('qtyColors', dateKey + '/' + key, color);
+    }
+    const hint = document.getElementById('colorPickerHint');
+    if (hint) hint.textContent = '색상이 적용되었습니다';
+    setTimeout(() => { if(hint) hint.textContent = '제품명 또는 입력칸을 먼저 클릭하세요'; }, 1500);
+  } else {
+    const hint = document.getElementById('colorPickerHint');
+    if (hint) hint.textContent = '⚠ 입력칸을 먼저 클릭해 주세요';
+    setTimeout(() => { if(hint) hint.textContent = '제품명 또는 입력칸을 먼저 클릭하세요'; }, 1800);
+  }
+}
+
+function clearColor() {
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+  _activeColorSwatch = null;
+  const dateKey = getCurrentDateKey();
+  if (_selectedProductEl) {
+    _selectedProductEl.style.background = '';
+    _selectedProductEl.style.outline = '';
+    const key = _selectedProductEl.dataset.productKey;
+    if (key) {
+      setProductColor(dateKey, key, null);
+      cloudPushColor('productColors', dateKey + '/' + key, null);
+    }
+    _selectedProductEl = null;
+    const hint = document.getElementById('colorPickerHint');
+    if (hint) hint.textContent = '색상이 제거되었습니다';
+    setTimeout(() => { if(hint) hint.textContent = '제품명 또는 입력칸을 먼저 클릭하세요'; }, 1500);
+  } else if (_selectedQtyEl) {
+    _selectedQtyEl.style.background = '';
+    _selectedQtyEl.classList.remove('color-selected');
+    const key = _selectedQtyEl.dataset.colorKey;
+    if (key) {
+      setQtyColor(dateKey, key, null);
+      cloudPushColor('qtyColors', dateKey + '/' + key, null);
+    }
+    const hint = document.getElementById('colorPickerHint');
+    if (hint) hint.textContent = '색상이 제거되었습니다';
+    setTimeout(() => { if(hint) hint.textContent = '제품명 또는 입력칸을 먼저 클릭하세요'; }, 1500);
+  }
+}
+
+function updateSummary() {
+  // 전체 분류 기준으로 생산 합계 집계
+  let filled=0, totalProd=0, ship=0;
+  const curItems = catData[currentCat]||[];
+  curItems.forEach(name=>{
+    COLS.forEach((col)=>{
+      const v=getInput(currentCat,name,col);
+      if(v>0){ filled++; ship+=v; }
+    });
+  });
+  // 전체 분류의 모든 값 합산 (총 생산 합계)
+  CATS.forEach(cat=>{
+    const items = catData[cat]||[];
+    items.forEach(name=>{
+      COLS.forEach((col)=>{
+        const v=getInput(cat,name,col);
+        totalProd+=v;
+      });
+    });
+  });
+  document.getElementById('sc0').textContent = filled;
+  document.getElementById('sc1').textContent = totalProd;
+  document.getElementById('sc2').textContent = ship;
+  document.getElementById('sc3').textContent = savedDays;
+}
+
+// ══════════════════════════════════════════
+// 날짜별 읽기 전용 모드 (관리자 비밀번호: hare1234)
+// ══════════════════════════════════════════
+const ADMIN_PW = 'hare1234';
+let _adminUnlocked = false; // 잠금 해제 상태
+
+function isDateReadOnly() {
+  if (_adminUnlocked) return false;
+  return getCurrentDateKey() !== getTodayStr();
+}
+
+function checkAdminAndEdit(callback) {
+  if (_adminUnlocked) { callback(); return; }
+  const pw = prompt('🔐 이전 날짜 데이터 수정은 관리자만 가능합니다.\n비밀번호를 입력하세요:');
+  if (pw === ADMIN_PW) {
+    _adminUnlocked = true;
+    showToast('✅ 관리자 모드 활성화');
+    callback();
+  } else if (pw !== null) {
+    showToast('❌ 비밀번호가 올바르지 않습니다');
+  }
+}
+
+function updateReadOnlyBanner() {
+  let banner = document.getElementById('readOnlyBanner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'readOnlyBanner';
+    banner.style.cssText = 'margin:6px 16px;padding:8px 16px;background:#FFF3E0;border:1px solid #FFB74D;border-radius:4px;font-size:12px;color:#E65100;display:flex;align-items:center;justify-content:space-between;';
+    const noticeEl = document.querySelector('.notice-banner');
+    if (noticeEl) noticeEl.after(banner);
+  }
+  if (isDateReadOnly()) {
+    const dateStr = getCurrentDateKey();
+    banner.innerHTML = `<span>🔒 <strong>${dateStr}</strong> — 이전 날짜 데이터입니다. 수정하려면 관리자 인증이 필요합니다.</span>
+      <button onclick="checkAdminAndEdit(()=>{ renderMainTable(); updateReadOnlyBanner(); })" 
+        style="padding:4px 12px;background:#F57C00;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-family:inherit;">🔓 관리자 잠금 해제</button>`;
+    banner.style.display = 'flex';
+  } else {
+    banner.style.display = 'none';
+  }
+}
+
+function getTodayStr() {
+  const n=new Date(); const y=n.getFullYear();
+  const m=String(n.getMonth()+1).padStart(2,'0');
+  const d=String(n.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+function updateHeaderDate() {
+  const val = document.getElementById('dateInput').value;
+  if (!val) return;
+  const [y,m,d] = val.split('-');
+  const fmt = document.getElementById('dateFmtSelect') ? document.getElementById('dateFmtSelect').value : 'kr';
+  let str;
+  if (fmt==='slash') str=`${y}/${m}/${d}`;
+  else if(fmt==='dash') str=`${y}-${m}-${d}`;
+  else str=`${y}년 ${m}월 ${d}일`;
+  document.getElementById('headerSub').innerHTML = `${str} &nbsp;● 시스 진행중`;
+}
+document.getElementById('dateInput').addEventListener('change', () => {
+  _adminUnlocked = false; // 날짜 바뀌면 잠금 재설정
+  updateHeaderDate();
+  renderMainTable();
+  updateSummary();
+  updateReadOnlyBanner();
+});
+// 오늘 날짜로 초기화
+(function initDate(){
+  const di = document.getElementById('dateInput');
+  di.value = getTodayStr();
+  updateHeaderDate();
+  // 설정 옵션 텍스트도 오늘 날짜로
+  const [y,m,d] = getTodayStr().split('-');
+  const op = document.getElementById('dateFmtSelect');
+  if(op){ op.options[0].text=`${y}년 ${m}월 ${d}일`; op.options[1].text=`${y}/${m}/${d}`; op.options[2].text=`${y}-${m}-${d}`; }
+})();
+// 자정 자동 갱신
+(function schedMidnight(){
+  const n=new Date(), ms=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1,0,0,1)-n;
+  setTimeout(()=>{
+    document.getElementById('dateInput').value=getTodayStr();
+    _adminUnlocked = false;
+    updateHeaderDate();
+    renderMainTable();
+    updateReadOnlyBanner();
+    schedMidnight();
+  }, ms);
+})();
+
+// ══════════════════════════════════════════
+// 판매가 blur 핸들러
+// ══════════════════════════════════════════
+function onPriceBlur(el) {
+  if (el.disabled) return; // 읽기 전용 날짜에서는 무시
+  const name = el.dataset.name;
+  const raw = parseInt(el.value) || 0;
+  el.dataset.raw = raw;
+  if (raw > 0) { PRICES[name] = raw; el.value = raw.toLocaleString()+'원'; }
+  else         { delete PRICES[name]; el.value = ''; }
+  savePrices();
+  // 판매가 단일 경로 즉시 저장
+  cloudPushPrice(name, raw > 0 ? raw : null);
+}
+
+// ══════════════════════════════════════════
+// 결산 기능
+// ══════════════════════════════════════════
+// 지점별 → 담당 분류 매핑
+const SETT_STORE_CATS = {
+  '도안점':    ['도안(빵,파이1)','도안(빵,파이2)','도안(케익)','공방','마카롱,다쿠아즈','쿠키,쨈'],
+  '둔산점':    ['둔산(빵,파이1)','둔산(빵,파이2)','둔산(케익)'],
+  '갤러리아점':['갤러리아(빵,파이1)','갤러리아(빵,파이2)','갤러리아(케익)'],
+};
+// 지점명 → 컬럼명 매핑
+const SETT_STORE_COL = { '도안점':'도안점', '둔산점':'둔산점', '갤러리아점':'갤러리아점' };
+
+let _currentSettTab = '도안점';
+let _settMode = 'month';       // 'month' | 'range'
+let _settFromDate = '';        // YYYY-MM-DD
+let _settToDate   = '';        // YYYY-MM-DD
+
+function _initSettYearSel() {
+  const sel = document.getElementById('settYearSel');
+  if (!sel) return;
+  sel.innerHTML = '';
+  const thisYear = new Date().getFullYear();
+  // 현재 연도 기준 ±2년 범위
+  for (let y = thisYear - 2; y <= thisYear + 1; y++) {
+    const op = document.createElement('option');
+    op.value = y; op.textContent = y + '년';
+    sel.appendChild(op);
+  }
+  sel.value = thisYear;
+}
+
+function openSettlement() {
+  _currentSettTab = '도안점';
+  _settMode = 'month';
+  document.querySelectorAll('.sett-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sttab-도안점').classList.add('active');
+
+  // 연도·월 셀렉트 초기화
+  _initSettYearSel();
+  const di = document.getElementById('dateInput').value || getTodayStr();
+  const [cy, cm] = di.substring(0,7).split('-');
+  document.getElementById('settYearSel').value  = cy;
+  document.getElementById('settMonthSel').value = cm;
+
+  document.getElementById('settModeMonth').classList.add('active');
+  document.getElementById('settModeRange').classList.remove('active');
+  document.getElementById('settMonthArea').style.display = 'flex';
+  document.getElementById('settRangeArea').style.display = 'none';
+
+  applySettMonth();
+  openModal('settlementOverlay');
+}
+
+function applySettMonth() {
+  const y = document.getElementById('settYearSel').value;
+  const m = document.getElementById('settMonthSel').value;
+  const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
+  _settFromDate = `${y}-${m}-01`;
+  _settToDate   = `${y}-${m}-${String(lastDay).padStart(2,'0')}`;
+  document.getElementById('settFromDate').value = _settFromDate;
+  document.getElementById('settToDate').value   = _settToDate;
+  _updateSettPeriodInfo();
+  renderSettlement(_currentSettTab);
+}
+
+function setSettMode(mode) {
+  _settMode = mode;
+  if (mode === 'month') {
+    document.getElementById('settModeMonth').classList.add('active');
+    document.getElementById('settModeRange').classList.remove('active');
+    document.getElementById('settMonthArea').style.display = 'flex';
+    document.getElementById('settRangeArea').style.display = 'none';
+    applySettMonth();
+  } else {
+    document.getElementById('settModeMonth').classList.remove('active');
+    document.getElementById('settModeRange').classList.add('active');
+    document.getElementById('settMonthArea').style.display = 'none';
+    document.getElementById('settRangeArea').style.display = 'flex';
+    document.getElementById('settFromDate').value = _settFromDate;
+    document.getElementById('settToDate').value   = _settToDate;
+  }
+}
+
+function applySettRange() {
+  const from = document.getElementById('settFromDate').value;
+  const to   = document.getElementById('settToDate').value;
+  if (!from || !to) { showToast('⚠️ 시작일과 종료일을 선택하세요'); return; }
+  if (from > to)    { showToast('⚠️ 종료일이 시작일보다 이전입니다'); return; }
+  _settFromDate = from;
+  _settToDate   = to;
+  _updateSettPeriodInfo();
+  renderSettlement(_currentSettTab);
+}
+
+function _updateSettPeriodInfo() {
+  const el = document.getElementById('settPeriodInfo');
+  if (!el) return;
+  if (_settMode === 'month') {
+    const [y,m] = _settFromDate.split('-');
+    el.textContent = `📌 ${y}년 ${parseInt(m)}월 전체`;
+  } else {
+    const [fy,fm,fd] = _settFromDate.split('-');
+    const [ty,tm,td] = _settToDate.split('-');
+    // 같은 달이면 "3월 1일 ~ 15일"
+    if (fy===ty && fm===tm) {
+      el.textContent = `📌 ${parseInt(fm)}월 ${parseInt(fd)}일 ~ ${parseInt(td)}일`;
+    } else {
+      el.textContent = `📌 ${parseInt(fm)}월 ${parseInt(fd)}일 ~ ${parseInt(tm)}월 ${parseInt(td)}일`;
+    }
+  }
+  // 결산 부제목도 업데이트
+  const lbl = document.getElementById('settlementMonthLabel');
+  if (lbl) lbl.textContent = document.getElementById('settPeriodInfo').textContent.replace('📌 ','') + ' 결산 — 출고량 × 판매가';
+}
+
+// 전체 초기화(설정)도 날짜별 구조 유지
+
+
+// records에서 해당 기간에 저장된 날짜 목록 수집 (미래: 날짜별 상세 결산용)
+// 현재는 inputData (현재 입력 기준) 그대로 사용하되
+// 기간 필터 정보를 화면에 표시하는 형태로 동작
+function selectSettTab(store) {
+  _currentSettTab = store;
+  document.querySelectorAll('.sett-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sttab-'+store).classList.add('active');
+  renderSettlement(store);
+}
+
+// 기간 내 날짜 목록 반환
+function _settDateKeys() {
+  const keys = Object.keys(inputData).filter(d => d >= _settFromDate && d <= _settToDate);
+  return keys;
+}
+
+// 기간 합산 getInput
+function getInputRange(cat, name, col) {
+  return _settDateKeys().reduce((sum, d) => {
+    const v = (inputData[d]&&inputData[d][cat]&&inputData[d][cat][name]) ? (inputData[d][cat][name][col]||0) : 0;
+    return sum + v;
+  }, 0);
+}
+
+function renderSettlement(store) {
+  const cats = SETT_STORE_CATS[store] || [];
+  const OUT_COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
+  const el = document.getElementById('settlementContent');
+  let html = '', grandQty = 0, grandAmt = 0;
+
+  const periodTxt = (document.getElementById('settPeriodInfo')||{}).textContent || '';
+  const dateKeys = _settDateKeys().sort(); // 오름차순 날짜
+
+  cats.forEach(cat => {
+    const items = catData[cat] || [];
+    let catQty = 0, catAmt = 0, dateBlocks = '';
+
+    if (dateKeys.length === 0) {
+      dateBlocks = `<div style="text-align:center;color:#bbb;padding:16px;font-size:11px;">출고 수량 없음</div>`;
+    } else {
+      dateKeys.forEach(d => {
+        let rowNum = 1, rows = '';
+        items.forEach(name => {
+          const dQty = OUT_COLS.reduce((sum, c) => {
+            const v = (inputData[d]&&inputData[d][cat]&&inputData[d][cat][name]) ? (inputData[d][cat][name][c]||0) : 0;
+            return sum + v;
+          }, 0);
+          if (dQty <= 0) return;
+          const price = PRICES[name] || 0;
+          const dAmt = dQty * price;
+          catQty += dQty; catAmt += dAmt;
+          rows += `<tr>
+            <td style="color:#555;font-size:10px;width:22px;text-align:center;">${rowNum++}</td>
+            <td>${name}</td>
+            <td>${price > 0 ? price.toLocaleString()+'원' : '<span style="color:#bbb;">미등록</span>'}</td>
+            <td style="color:#1976D2;font-weight:bold;">${dQty.toLocaleString()}</td>
+            <td style="color:#388E3C;font-weight:bold;">${dAmt > 0 ? dAmt.toLocaleString()+'원' : '—'}</td>
+          </tr>`;
+        });
+        if (!rows) return; // 이 날짜에 해당 분류 출고 없으면 스킵
+        dateBlocks += `
+          <div style="background:#E8F0FE;border-left:4px solid #1976D2;padding:6px 12px;margin:8px 0 0;border-radius:0 4px 4px 0;font-size:12px;font-weight:700;color:#1565C0;">📅 ${d}</div>
+          <table class="sett-table">
+            <thead><tr>
+              <th style="width:22px;"></th>
+              <th style="text-align:left;">제품명</th>
+              <th style="width:16%;">판매가</th>
+              <th style="width:11%;">출고합계</th>
+              <th style="width:22%;">금액</th>
+            </tr></thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+      });
+
+      if (!dateBlocks) {
+        dateBlocks = `<div style="text-align:center;color:#bbb;padding:16px;font-size:11px;">출고 수량 없음</div>`;
+      } else {
+        // 분류 소계
+        dateBlocks += `
+          <table class="sett-table" style="margin-top:6px;">
+            <tbody>
+              <tr class="sett-subtotal">
+                <td colspan="3">소 계</td>
+                <td>${catQty.toLocaleString()}개</td>
+                <td>${catAmt > 0 ? catAmt.toLocaleString()+'원' : '—'}</td>
+              </tr>
+            </tbody>
+          </table>`;
+      }
+    }
+
+    grandQty += catQty; grandAmt += catAmt;
+    html += `
+    <div class="sett-group">
+      <div class="sett-group-title">
+        <span>📂 ${cat}</span>
+        <span style="font-size:11px;color:#555;">${catQty.toLocaleString()}개 &nbsp;/&nbsp; ${catAmt > 0 ? catAmt.toLocaleString()+'원' : '—'}</span>
+      </div>
+      ${dateBlocks}
+    </div>`;
+  });
+
+  // 전체 합계 행
+  const periodLabel = periodTxt.replace('📌 ','') || '합계';
+  html += `
+  <table class="sett-table" style="margin-top:8px;">
+    <tbody>
+      <tr class="sett-grand">
+        <td colspan="2" style="font-size:13px;font-weight:bold;">🏆 ${store} ${periodLabel}</td>
+        <td></td>
+        <td style="font-size:13px;">${grandQty.toLocaleString()}개</td>
+        <td style="color:#1565C0;font-size:14px;">${grandAmt > 0 ? grandAmt.toLocaleString()+'원' : '—'}</td>
+      </tr>
+    </tbody>
+  </table>`;
+
+  el.innerHTML = html;
+}
+
+
+
+// ══════════════════════════════════════════
+// 누적 집계 기능
+// ══════════════════════════════════════════
+let _accumMode     = 'month';
+let _accumFromDate = '';
+let _accumToDate   = '';
+
+function openAccum() {
+  _accumMode = 'month';
+
+  // 연도 옵션 초기화
+  const ySel = document.getElementById('accumYearSel');
+  ySel.innerHTML = '';
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear - 2; y <= thisYear + 1; y++) {
+    const op = document.createElement('option');
+    op.value = y; op.textContent = y + '년';
+    ySel.appendChild(op);
+  }
+  ySel.value = thisYear;
+
+  // 현재 날짜 기준 월 설정
+  const di = document.getElementById('dateInput').value || getTodayStr();
+  const [cy, cm] = di.substring(0, 7).split('-');
+  document.getElementById('accumYearSel').value  = cy;
+  document.getElementById('accumMonthSel').value = cm;
+
+  document.getElementById('accumModeMonth').classList.add('active');
+  document.getElementById('accumModeRange').classList.remove('active');
+  document.getElementById('accumMonthArea').style.display = 'flex';
+  document.getElementById('accumRangeArea').style.display = 'none';
+
+  // 분류 필터 옵션
+  const cf = document.getElementById('accumCatFilter');
+  cf.innerHTML = '<option value="__ALL__">전체 분류</option>';
+  CATS.forEach(c => {
+    const op = document.createElement('option');
+    op.value = c; op.textContent = c;
+    cf.appendChild(op);
+  });
+
+  applyAccumMonth();
+  openModal('accumOverlay');
+}
+
+function setAccumMode(mode) {
+  _accumMode = mode;
+  if (mode === 'month') {
+    document.getElementById('accumModeMonth').classList.add('active');
+    document.getElementById('accumModeRange').classList.remove('active');
+    document.getElementById('accumMonthArea').style.display = 'flex';
+    document.getElementById('accumRangeArea').style.display = 'none';
+    applyAccumMonth();
+  } else {
+    document.getElementById('accumModeMonth').classList.remove('active');
+    document.getElementById('accumModeRange').classList.add('active');
+    document.getElementById('accumMonthArea').style.display = 'none';
+    document.getElementById('accumRangeArea').style.display = 'flex';
+    // 기본값: 현재 설정된 날짜 범위
+    document.getElementById('accumFromDate').value = _accumFromDate;
+    document.getElementById('accumToDate').value   = _accumToDate;
+  }
+}
+
+function applyAccumMonth() {
+  const y = document.getElementById('accumYearSel').value;
+  const m = document.getElementById('accumMonthSel').value;
+  const lastDay = new Date(parseInt(y), parseInt(m), 0).getDate();
+  _accumFromDate = `${y}-${m}-01`;
+  _accumToDate   = `${y}-${m}-${String(lastDay).padStart(2, '0')}`;
+  _updateAccumPeriodInfo();
+  renderAccum();
+}
+
+function applyAccumRange() {
+  const from = document.getElementById('accumFromDate').value;
+  const to   = document.getElementById('accumToDate').value;
+  if (!from || !to)  { showToast('⚠️ 시작일과 종료일을 선택하세요'); return; }
+  if (from > to)     { showToast('⚠️ 종료일이 시작일보다 이전입니다'); return; }
+  _accumFromDate = from;
+  _accumToDate   = to;
+  _updateAccumPeriodInfo();
+  renderAccum();
+}
+
+function _updateAccumPeriodInfo() {
+  const el = document.getElementById('accumPeriodInfo');
+  if (!el) return;
+  if (_accumMode === 'month') {
+    const [y, m] = _accumFromDate.split('-');
+    el.textContent = `📌 ${y}년 ${parseInt(m)}월 전체`;
+  } else {
+    const [fy, fm, fd] = _accumFromDate.split('-');
+    const [ty, tm, td] = _accumToDate.split('-');
+    if (fy === ty && fm === tm) {
+      el.textContent = `📌 ${parseInt(fm)}월 ${parseInt(fd)}일 ~ ${parseInt(td)}일`;
+    } else {
+      el.textContent = `📌 ${parseInt(fm)}월 ${parseInt(fd)}일 ~ ${parseInt(tm)}월 ${parseInt(td)}일`;
+    }
+  }
+  const sub = document.getElementById('accumSubLabel');
+  if (sub) sub.textContent = (el.textContent.replace('📌 ', '')) + ' — 지점별 수량 누적 합계';
+}
+
+// 집계 기간 내 날짜 키 목록
+function _accumDateKeys() {
+  return Object.keys(inputData).filter(d => d >= _accumFromDate && d <= _accumToDate).sort();
+}
+
+// cat+name+col 기간 합산
+function getAccumVal(cat, name, col) {
+  return _accumDateKeys().reduce((sum, d) => {
+    const v = (inputData[d] && inputData[d][cat] && inputData[d][cat][name])
+      ? (inputData[d][cat][name][col] || 0) : 0;
+    return sum + v;
+  }, 0);
+}
+
+function renderAccum() {
+  const el = document.getElementById('accumContent');
+  const dateKeys = _accumDateKeys();
+  const catFilter = document.getElementById('accumCatFilter').value;
+  const targetCats = catFilter === '__ALL__' ? CATS : [catFilter];
+
+  // 지점 열
+  const storeCols = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
+
+  // 전체 합계 누산
+  const grandStore = Object.fromEntries(storeCols.map(c => [c, 0]));
+  let grandTotal = 0;
+
+  let html = '';
+
+  if (dateKeys.length === 0) {
+    el.innerHTML = `<div style="text-align:center;color:#bbb;padding:40px;font-size:13px;">📭 선택한 기간에 입력된 데이터가 없습니다</div>`;
+    return;
+  }
+
+  targetCats.forEach(cat => {
+    const items = catData[cat] || [];
+    if (!items.length) return;
+
+    // 이 분류의 지점별 소계
+    const catStore = Object.fromEntries(storeCols.map(c => [c, 0]));
+    let catTotal = 0;
+
+    // 품목별 행 생성
+    let rowsHtml = '';
+    let rowIdx = 1;
+
+    items.forEach(name => {
+      const storeVals = storeCols.map(col => getAccumVal(cat, name, col));
+      const rowTotal  = storeVals.reduce((s, v) => s + v, 0);
+      if (rowTotal === 0) return; // 0이면 행 생략
+
+      storeCols.forEach((col, i) => { catStore[col] += storeVals[i]; });
+      catTotal += rowTotal;
+
+      const cells = storeVals.map(v =>
+        `<td>${v > 0 ? `<strong>${v.toLocaleString()}</strong>` : '<span class="accum-zero">—</span>'}</td>`
+      ).join('');
+
+      rowsHtml += `<tr>
+        <td style="color:#aaa;font-size:10px;text-align:center;width:24px;">${String(rowIdx++).padStart(2,'0')}</td>
+        <td class="col-name">${name}</td>
+        ${cells}
+        <td class="col-total">${rowTotal.toLocaleString()}</td>
+      </tr>`;
+    });
+
+    if (!rowsHtml) return; // 이 분류 전체 0이면 스킵
+
+    // 분류 소계행
+    const catSubCells = storeCols.map(col =>
+      `<td>${catStore[col] > 0 ? catStore[col].toLocaleString() : '—'}</td>`
+    ).join('');
+
+    // 전체 누산
+    storeCols.forEach(col => { grandStore[col] += catStore[col]; });
+    grandTotal += catTotal;
+
+    html += `
+    <div class="accum-cat-header">📂 ${cat} &nbsp;<span style="font-size:11px;font-weight:normal;color:#555;">총 ${catTotal.toLocaleString()}개</span></div>
+    <table class="accum-table">
+      <thead>
+        <tr>
+          <th style="width:24px;"></th>
+          <th style="text-align:left;min-width:120px;">제품명</th>
+          ${storeCols.map(c => `<th class="col-store">${c}</th>`).join('')}
+          <th style="background:#0D47A1;color:#fff;">합계</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rowsHtml}
+        <tr class="accum-subtotal">
+          <td colspan="2" style="text-align:left;">소 계</td>
+          ${catSubCells}
+          <td class="col-total">${catTotal.toLocaleString()}</td>
+        </tr>
+      </tbody>
+    </table>`;
+  });
+
+  if (!html) {
+    el.innerHTML = `<div style="text-align:center;color:#bbb;padding:40px;font-size:13px;">📭 선택한 기간에 입력된 데이터가 없습니다</div>`;
+    return;
+  }
+
+  // 전체 합계 행
+  const grandCells = storeCols.map(col =>
+    `<td>${grandStore[col] > 0 ? grandStore[col].toLocaleString() : '—'}</td>`
+  ).join('');
+
+  const periodLbl = (document.getElementById('accumPeriodInfo').textContent || '').replace('📌 ', '');
+
+  html += `
+  <div style="height:12px;"></div>
+  <table class="accum-table">
+    <tbody>
+      <tr class="accum-grand">
+        <td colspan="2" style="text-align:left;font-size:13px;">🏆 전체 합계 &nbsp;<span style="font-size:11px;font-weight:normal;color:#666;">(${periodLbl})</span></td>
+        ${grandCells}
+        <td class="col-total" style="font-size:13px;">${grandTotal.toLocaleString()}</td>
+      </tr>
+    </tbody>
+  </table>`;
+
+  el.innerHTML = html;
+}
+
+function exportAccumCSV() {
+  const storeCols = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
+  const catFilter = document.getElementById('accumCatFilter').value;
+  const targetCats = catFilter === '__ALL__' ? CATS : [catFilter];
+  const periodSuffix = _accumMode === 'month'
+    ? _accumFromDate.substring(0, 7)
+    : `${_accumFromDate}_${_accumToDate}`;
+
+  let csv = `분류,제품명,${storeCols.join(',')},합계\n`;
+  targetCats.forEach(cat => {
+    (catData[cat] || []).forEach(name => {
+      const vals = storeCols.map(col => getAccumVal(cat, name, col));
+      const total = vals.reduce((s, v) => s + v, 0);
+      if (total === 0) return;
+      csv += `${cat},${name},${vals.join(',')},${total}\n`;
+    });
+  });
+
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `누적집계_${periodSuffix}.csv`;
+  a.click();
+  showToast('누적 집계 CSV 다운로드 완료');
+}
+
+
+function exportSettlementCSV() {
+  const store = _currentSettTab;
+  const cats  = SETT_STORE_CATS[store] || [];
+  const OUT_COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
+  // 파일명에 기간 포함
+  const periodSuffix = _settMode === 'month'
+    ? _settFromDate.substring(0,7)
+    : `${_settFromDate}_${_settToDate}`;
+  let csv = '분류,제품명,판매가,출고합계,금액\n';
+  cats.forEach(cat => {
+    (catData[cat]||[]).forEach(name => {
+      const qty = OUT_COLS.reduce((sum, c) => sum + (getInputRange(cat, name, c) || 0), 0);
+      if (qty <= 0) return;
+      const price = PRICES[name] || 0;
+      csv += `${cat},${name},${price},${qty},${qty*price}\n`;
+    });
+  });
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `결산_${store}_${periodSuffix}.csv`; a.click();
+  showToast(`${store} 결산 CSV 다운로드 완료`);
+}
+
+// ══════════════════════════════════════════
+// 파일로 저장 (품목 변경 영구 반영)
+// ══════════════════════════════════════════
+function saveFile() {
+  const catLines = Object.entries(catData)
+    .map(([k,v]) => '    ' + JSON.stringify(k) + ': ' + JSON.stringify(v))
+    .join(',\n');
+  const metaLines = Object.entries(catMeta)
+    .map(([k,v]) => '    ' + JSON.stringify(k) + ': ' + JSON.stringify(v))
+    .join(',\n');
+  const newCatFunc  = 'function defaultCatData() {\n  return {\n' + catLines + ',\n  };\n}';
+  const newMetaFunc = 'function defaultCatMeta() {\n  return {\n' + metaLines + '\n  };\n}';
+  let src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  src = src.replace(/function defaultCatData\(\)\s*\{[\s\S]*?\n\}/, newCatFunc);
+  src = src.replace(/function defaultCatMeta\(\)\s*\{[\s\S]*?\n\}/, newMetaFunc);
+  const blob = new Blob([src], {type:'text/html;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'production_log.html'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('📁 파일 저장 완료! 다운받은 파일을 앞으로 사용하세요.');
+}
+
+// ══════════════════════════════════════════
+// 저장
+// ══════════════════════════════════════════
+async function saveData() {
+  if (isDateReadOnly()) {
+    checkAdminAndEdit(async () => { await _doSaveData(); });
+    return;
+  }
+  await _doSaveData();
+}
+
+async function _doSaveData() {
+  saveCatData();
+
+  const date = document.getElementById('dateInput').value;
+  const items = catData[currentCat]||[];
+  let ship = 0;
+  items.forEach(name => { COLS.forEach(col => { ship += getInput(currentCat, name, col); }); });
+
+  const rec = { date, cat: currentCat, items: items.length, prod: 0, ship, ts: Date.now() };
+
+  // savedDays +1
+  savedDays++;
+  saveSavedDays();
+  updateSummary();
+
+  // 병렬 저장: inputData/catData/etc는 세분화 PUT, records는 read-merge-write로 안전 저장
+  const [syncedMain, syncedRec, syncedDays] = await Promise.all([
+    saveAll(),
+    _safePushRecords(rec),
+    _putPath('/data/savedDays', savedDays),
+  ]);
+
+  const synced = syncedMain && syncedRec && syncedDays;
+  showToast(synced ? '💾 저장 + ☁️ 동기화 완료!' : '💾 저장 완료');
+}
+function confirmReset() {
+  if (isDateReadOnly()) {
+    checkAdminAndEdit(() => { _doConfirmReset(); });
+    return;
+  }
+  _doConfirmReset();
+}
+function _doConfirmReset() {
+  document.getElementById('resetCatName').textContent = currentCat;
+  openModal('resetOverlay');
+}
+async function doReset() {
+  const dateKey = getCurrentDateKey();
+  const items = catData[currentCat]||[];
+  // 로컬 초기화
+  items.forEach(name => { COLS.forEach(col => setInput(currentCat, name, col, 0)); });
+  saveInputData();
+  // 해당 분류 날짜 경로만 null PUT (다른 사용자의 다른 분류 데이터 건드리지 않음)
+  const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+  await _putPath(`/data/inputData/${esc(dateKey)}/${esc(currentCat)}`, null);
+  closeModal('resetOverlay');
+  renderMainTable();
+  updateSummary();
+  showToast('초기화 완료');
+}
+
+// ══════════════════════════════════════════
+// CSV 내보내기
+// ══════════════════════════════════════════
+function exportCSV() {
+  const date = document.getElementById('dateInput').value;
+
+  // 쉼표·줄바꿈·따옴표가 포함된 셀을 안전하게 감싸는 함수
+  function csvCell(val) {
+    const s = String(val == null ? '' : val);
+    if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    return s;
+  }
+
+  let csv = `날짜,분류,제품명,${COLS.join(',')},비고\n`;
+
+  CATS.forEach(cat=>{
+    (catData[cat]||[]).forEach(name=>{
+      const vals = COLS.map(col=>getInput(cat,name,col));
+      const memoKey = cat + '__' + name;
+      const memo = memos[memoKey] || '';
+      csv += `${csvCell(date)},${csvCell(cat)},${csvCell(name)},${vals.join(',')},${csvCell(memo)}\n`;
+    });
+  });
+
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `생산일지_${date}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV 다운로드 완료');
+}
+
+// ══════════════════════════════════════════
+// 목록·항목 수정 팝업
+// ══════════════════════════════════════════
+function openEditItems() {
+  document.getElementById('editModalTitle').textContent = `📂 ${currentCat} — 품목 수정`;
+  document.getElementById('addItemInput').value = '';
+  document.getElementById('addPosInput').value = '';
+  renderEditList();
+  openModal('editOverlay');
+}
+
+function renderEditList() {
+  const ul = document.getElementById('editItemList');
+  const empty = document.getElementById('editEmpty');
+  ul.innerHTML = '';
+  const items = catData[currentCat]||[];
+  if(!items.length) { empty.style.display='block'; return; }
+  empty.style.display = 'none';
+
+  items.forEach((name, idx) => {
+    const li = document.createElement('li');
+    li.dataset.idx = idx;
+    li.draggable = true;
+    li.innerHTML = `
+      <span class="drag-handle" title="드래그로 순서 변경">⠿</span>
+      <span class="item-idx">${idx+1}</span>
+      <input class="item-input" type="text" value="${name}" data-idx="${idx}">
+      <button class="item-del" title="삭제" onclick="deleteItem(${idx})">✕</button>`;
+
+    // 드래그 이벤트
+    li.addEventListener('dragstart', e => {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', idx);
+      setTimeout(() => li.classList.add('dragging'), 0);
+    });
+    li.addEventListener('dragend', () => {
+      li.classList.remove('dragging');
+      document.querySelectorAll('#editItemList li').forEach(el => el.classList.remove('drag-over-top'));
+    });
+    li.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('#editItemList li').forEach(el => el.classList.remove('drag-over-top'));
+      li.classList.add('drag-over-top');
+    });
+    li.addEventListener('dragleave', () => li.classList.remove('drag-over-top'));
+    li.addEventListener('drop', e => {
+      e.preventDefault();
+      const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
+      const toIdx = parseInt(li.dataset.idx);
+      if (fromIdx === toIdx) return;
+      // 현재 편집 내용 먼저 수집
+      collectCurrentEdits();
+      const items = catData[currentCat];
+      const moved = items.splice(fromIdx, 1)[0];
+      const insertAt = fromIdx < toIdx ? toIdx - 1 : toIdx;
+      items.splice(insertAt, 0, moved);
+      renderEditList();
+    });
+
+    ul.appendChild(li);
+  });
+}
+
+// 현재 입력값 즉시 catData에 반영
+function collectCurrentEdits() {
+  const inputs = document.querySelectorAll('#editItemList .item-input');
+  const items = catData[currentCat];
+  inputs.forEach(inp => {
+    const i = parseInt(inp.dataset.idx);
+    if (items[i] !== undefined) items[i] = inp.value.trim() || items[i];
+  });
+}
+
+
+function deleteItem(idx) {
+  collectCurrentEdits();
+  catData[currentCat].splice(idx, 1);
+  renderEditList();
+}
+
+function addItem() {
+  const inp = document.getElementById('addItemInput');
+  const posInp = document.getElementById('addPosInput');
+  const val = inp.value.trim();
+  if (!val) { inp.focus(); return; }
+  collectCurrentEdits();
+  if (!catData[currentCat]) catData[currentCat] = [];
+  const items = catData[currentCat];
+  const posVal = posInp.value.trim();
+  if (posVal !== '') {
+    let pos = parseInt(posVal);
+    if (isNaN(pos) || pos < 1) pos = 1;
+    if (pos > items.length + 1) pos = items.length + 1;
+    items.splice(pos - 1, 0, val); // pos번째 앞에 삽입
+  } else {
+    items.push(val);
+  }
+  inp.value = '';
+  posInp.value = '';
+  renderEditList();
+  // 추가된 항목으로 스크롤
+  const ul = document.getElementById('editItemList');
+  const targetIdx = posVal !== '' ? (parseInt(posVal)||1) - 1 : items.length - 1;
+  const lis = ul.querySelectorAll('li');
+  if (lis[targetIdx]) lis[targetIdx].scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+document.getElementById('addItemInput').addEventListener('keydown', e => { if (e.key==='Enter') addItem(); });
+document.getElementById('addPosInput').addEventListener('keydown', e => { if (e.key==='Enter') addItem(); });
+
+async function saveItems() {
+  // 이름 변경 시 판매가도 함께 이전 (oldName → newName)
+  const inputs = document.querySelectorAll('#editItemList .item-input');
+  const oldItems = (catData[currentCat] || []).slice(); // 수정 전 스냅샷
+  inputs.forEach(inp => {
+    const i = parseInt(inp.dataset.idx);
+    const oldName = oldItems[i];
+    const newName = inp.value.trim();
+    if (oldName && newName && oldName !== newName) {
+      if (PRICES[oldName] !== undefined) {
+        PRICES[newName] = PRICES[oldName];
+        delete PRICES[oldName];
+      }
+    }
+  });
+  collectCurrentEdits();
+  // 빈 값 제거
+  catData[currentCat] = (catData[currentCat]||[]).filter(v => v && v.trim());
+  saveCatData();
+  savePrices();
+  // catData와 prices만 독립 경로에 PUT (inputData 등 건드리지 않음)
+  await Promise.all([
+    _putPath('/data/catData', catData),
+    _putPath('/data/prices',  Object.keys(PRICES).length ? PRICES : null),
+  ]);
+  closeModal('editOverlay');
+  renderCatGrid();
+  renderMainTable();
+  updateCurrentBar();
+  showToast('품목 저장 완료 ✓');
+}
+
+// ══════════════════════════════════════════
+// 메모 팝업
+// ══════════════════════════════════════════
+function openMemo(cat, name, key) {
+  currentMemoKey = key;
+  document.getElementById('memoProductName').textContent = `${cat} > ${name}`;
+  document.getElementById('memoText').value = memos[key]||'';
+  openModal('memoOverlay');
+}
+
+function saveMemo() {
+  const val = document.getElementById('memoText').value.trim();
+  if(val) memos[currentMemoKey]=val;
+  else delete memos[currentMemoKey];
+  saveMemos();
+  cloudPushMemo(currentMemoKey, val || null);
+  closeModal('memoOverlay');
+  renderMainTable();
+  showToast('메모 저장 완료');
+}
+
+// ══════════════════════════════════════════
+// 기록 팝업
+// ══════════════════════════════════════════
+function openRecord() {
+  const body = document.getElementById('recordBody');
+  if(!records.length) {
+    body.innerHTML = `<div class="record-empty">저장된 기록이 없습니다.<br>💾 저장 버튼을 눌러 기록을 남기세요.</div>`;
+    openModal('recordOverlay'); return;
+  }
+  let html = `<table class="record-table"><thead><tr>
+    <th>날짜</th><th>분류</th><th>품목수</th><th>생산합계</th><th>출고합계</th>
+  </tr></thead><tbody>`;
+  records.forEach(r=>{
+    html += `<tr>
+      <td>${r.date||'-'}</td>
+      <td>${r.cat||'-'}</td><td>${r.items||0}개</td>
+      <td style="color:#1976D2;font-weight:bold;">${r.prod||0}</td>
+      <td style="color:#388E3C;font-weight:bold;">${r.ship||0}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  body.innerHTML = html;
+  openModal('recordOverlay');
+}
+
+async function clearAllRecords() {
+  if(!confirm('모든 기록을 삭제하시겠습니까?')) return;
+  records = [];
+  saveRecords();
+  await _putPath('/data/records', null);
+  openRecord();
+  showToast('기록 삭제 완료');
+}
+
+// ══════════════════════════════════════════
+// 설정 팝업
+// ══════════════════════════════════════════
+// openSettings → 위에서 재정의됨
+
+// ══════════════════════════════════════════
+// 클라우드 설정 UI 함수
+// ══════════════════════════════════════════
+function openSettings() {
+  document.getElementById('settingAutoSave').checked = autoSave;
+  const storedKey = localStorage.getItem('cloudApiKey') || '';
+  const storedBin = localStorage.getItem('cloudBinId')  || '';
+  document.getElementById('inputApiKey').value = storedKey;
+  document.getElementById('inputBinId').value  = storedBin;
+  const st = document.getElementById('cloudStatus');
+  if (storedKey && storedBin) {
+    st.textContent = '✅ 클라우드 연결 설정됨';
+    st.style.color = '#388E3C';
+  } else {
+    st.textContent = '⚠️ 아직 설정되지 않음 (로컬 저장만 사용 중)';
+    st.style.color = '#F57C00';
+  }
+  openModal('settingsOverlay');
+}
+
+function toggleApiKeyVis() {
+  const inp = document.getElementById('inputApiKey');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function saveCloudSettings() {
+  const key = document.getElementById('inputApiKey').value.trim();
+  const bin = document.getElementById('inputBinId').value.trim();
+  localStorage.setItem('cloudApiKey', key);
+  localStorage.setItem('cloudBinId',  bin);
+  // 전역 변수도 갱신
+  window.location.reload();
+}
+
+async function testCloudConnection() {
+  const key = document.getElementById('inputApiKey').value.trim();
+  const bin = document.getElementById('inputBinId').value.trim();
+  const st  = document.getElementById('cloudStatus');
+  if (!key || !bin) { st.textContent = '❌ API Key와 Bin ID를 먼저 입력하세요.'; st.style.color='#e53935'; return; }
+  st.textContent = '🔄 연결 테스트 중...'; st.style.color='#888';
+  try {
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${bin}/latest`, {
+      headers: { 'X-Master-Key': key }
+    });
+    if (r.ok) {
+      st.textContent = '✅ 연결 성공! 저장 버튼을 눌러 적용하세요.';
+      st.style.color = '#388E3C';
+    } else {
+      st.textContent = `❌ 연결 실패 (${r.status}) — API Key / Bin ID 확인하세요.`;
+      st.style.color = '#e53935';
+    }
+  } catch(e) {
+    st.textContent = '❌ 네트워크 오류: ' + e.message;
+    st.style.color = '#e53935';
+  }
+}
+
+async function autoCreateBin() {
+  const key = document.getElementById('inputApiKey').value.trim();
+  const st  = document.getElementById('cloudStatus');
+  if (!key) { st.textContent = '❌ API Key를 먼저 입력하세요.'; st.style.color='#e53935'; return; }
+  st.textContent = '🔄 Bin 자동 생성 중...'; st.style.color='#888';
+  const binId = await cloudCreate(key);
+  if (binId) {
+    document.getElementById('inputBinId').value = binId;
+    st.textContent = `✅ Bin 생성 완료! ID: ${binId}  →  저장 버튼 클릭`;
+    st.style.color = '#388E3C';
+  } else {
+    st.textContent = '❌ 생성 실패 — API Key를 확인하세요.';
+    st.style.color = '#e53935';
+  }
+}
+
+function toggleAutoSave() {
+  autoSave = document.getElementById('autoSaveToggle').checked;
+  document.getElementById('autoSaveLabel').textContent = autoSave?'활성':'비활성';
+  document.getElementById('autoSaveLabel').style.color = autoSave?'#1976D2':'#e53935';
+}
+
+async function resetSavedDays() {
+  savedDays = 0;
+  saveSavedDays();
+  updateSummary();
+  await _putPath('/data/savedDays', 0);
+  showToast('저장일 초기화 완료');
+}
+
+async function resetAllData() {
+  if(!confirm('모든 데이터(입력값, 품목, 기록)를 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
+  catData       = defaultCatData();
+  catMeta       = defaultCatMeta();
+  inputData     = {};
+  memos         = {};
+  records       = [];
+  savedDays     = 0;
+  PRICES        = {};
+  productColors = {};
+  qtyColors     = {};
+  saveInputData(); saveMemos(); saveRecords(); saveSavedDays();
+  savePrices(); saveProductColors(); saveQtyColors();
+  // 각 경로를 병렬로 초기화 — 전체 PATCH 없이 독립 PUT
+  await Promise.all([
+    _putPath('/data/catData',       catData),
+    _putPath('/data/inputData',     null),
+    _putPath('/data/memos',         null),
+    _putPath('/data/records',       null),
+    _putPath('/data/savedDays',     0),
+    _putPath('/data/prices',        null),
+    _putPath('/data/productColors', null),
+    _putPath('/data/qtyColors',     null),
+  ]);
+  closeModal('settingsOverlay');
+  renderCatGrid();
+  renderMainTable();
+  updateCurrentBar();
+  updateSummary();
+  showToast('전체 초기화 완료');
+}
+
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// 팝업 유틸
+// ══════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function overlayClick(e, id) { if(e.target===document.getElementById(id)) closeModal(id); }
+
+// ══════════════════════════════════════════
+// Toast
+// ══════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2000);
+}
+
+// ══════════════════════════════════════════
+// 자동저장 토글
+// ══════════════════════════════════════════
+document.getElementById('autoSaveToggle').addEventListener('change', toggleAutoSave);
+
+// ══════════════════════════════════════════
+// scheduleCloudPush — 하위 호환용 (품목 저장 등 비셀 데이터)
+// 디바운스 제거 → 즉시 전송
+// ══════════════════════════════════════════
+function scheduleCloudPush() {
+  // 모든 데이터를 독립 경로에 즉시 PUT
+  Promise.all([
+    _putPath('/data/catData',       catData),
+    _putPath('/data/inputData',     inputData),
+    _putPath('/data/memos',         Object.keys(memos).length ? memos : null),
+    _putPath('/data/prices',        Object.keys(PRICES).length ? PRICES : null),
+    _putPath('/data/savedDays',     savedDays),
+    _putPath('/data/productColors', Object.keys(productColors).length ? productColors : null),
+    _putPath('/data/qtyColors',     Object.keys(qtyColors).length ? qtyColors : null),
+  ]);
+}
+
+// ══════════════════════════════════════════
+// 탭 닫힘 시 미저장 데이터 flush (beforeunload)
+// ══════════════════════════════════════════
+window.addEventListener('beforeunload', () => {
+  // SSE 연결 정리
+  if (_sseSource) { _sseSource.close(); _sseSource = null; }
+  // 경로별 대기 큐에 남은 데이터가 있으면 sendBeacon으로 각각 flush
+  const pendingPaths = Object.keys(_pathQueues);
+  pendingPaths.forEach(path => {
+    const val = _pathQueues[path];
+    const body = JSON.stringify(val !== undefined ? val : null);
+    navigator.sendBeacon(
+      FB_URL + path + '.json',
+      new Blob([body], { type: 'application/json' })
+    );
+  });
+});
+
+// ══════════════════════════════════════════
+// 초기 렌더
+// ══════════════════════════════════════════
+(function resetAllInputToZero() {
+  if (!inputData || typeof inputData !== 'object') inputData = {};
+  saveInputData();
+})();
+
+renderCatGrid();
+renderMainTable();
+updateCurrentBar();
+updateSummary();
+updateReadOnlyBanner();
+
+// ══════════════════════════════════════════
+// Firebase 시작 — SSE 실시간 스트리밍
+// ══════════════════════════════════════════
+(async () => {
+  const badge = document.getElementById('cloudBadge');
+  if (badge) badge.innerHTML = '☁️ <span style="color:#1976D2;">연결 중...</span>';
+
+  // 1) 초기 전체 데이터 1회 로드
+  const ok = await loadFromCloud();
+  if (ok) {
+    renderMainTable();
+    updateSummary();
+    updateReadOnlyBanner();
+    showToast('✅ 데이터 로드 완료');
+  } else {
+    if (badge) badge.innerHTML = '☁️ <span style="color:#F57C00;">오프라인</span>';
+  }
+
+  // 2) SSE 실시간 스트리밍 시작 (폴링 완전 제거)
+  _startSSE();
+})();
+</script>
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+import { getDatabase, ref, push } 
+from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
+
+// Firebase 설정
+const firebaseConfig = {
+  apiKey: "AIzaSyACRdUgobb__urzDwfCCCIu4b_4_J4MAVA",
+  authDomain: "production-log-27c8f.firebaseapp.com",
+  databaseURL: "https://production-log-27c8f-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "production-log-27c8f",
+  storageBucket: "production-log-27c8f.firebasestorage.app",
+  messagingSenderId: "291853688608",
+  appId: "1:291853688608:web:86a1bfe4c6f8c89ebfc145"
+};
+
+// Firebase 초기화
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// 테스트 저장 함수
+function testSave() {
+  console.log("버튼 클릭됨");
+
+  push(ref(db, "test"), {
+    msg: "동시접속 테스트",
+    time: Date.now()
+  });
+}
+
+</script>
+</body>
+</html>
