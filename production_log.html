@@ -204,6 +204,28 @@ input:checked + .slider:before { transform:translateX(18px); }
 .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#323232; color:#fff; padding:9px 20px; border-radius:6px; font-size:12px; z-index:9999; opacity:0; transition:opacity .3s; pointer-events:none; white-space:nowrap; }
 .toast.show { opacity:1; }
 
+/* 관리자 잠금 관리 팝업 */
+.unlock-list { list-style:none; }
+.unlock-list li { display:flex; align-items:center; justify-content:space-between; padding:8px 4px; border-bottom:1px solid #f0f0f0; font-size:12px; }
+.unlock-list li:last-child { border-bottom:none; }
+.unlock-date-badge { display:inline-flex; align-items:center; gap:6px; font-weight:600; color:#1976D2; }
+.unlock-status { font-size:11px; padding:2px 8px; border-radius:10px; font-weight:600; }
+.unlock-status.open  { background:#E8F5E9; color:#2E7D32; border:1px solid #A5D6A7; }
+.unlock-status.locked { background:#FFEBEE; color:#C62828; border:1px solid #EF9A9A; }
+.admin-unlock-row { display:flex; gap:6px; align-items:center; margin-top:14px; padding-top:12px; border-top:1px dashed #e0e0e0; }
+.admin-date-pick { flex:1; border:1px solid #ccc; border-radius:4px; padding:5px 8px; font-size:12px; font-family:inherit; outline:none; }
+.admin-date-pick:focus { border-color:#1976D2; }
+.btn-unlock { background:#43A047; color:#fff; border:none; border-radius:4px; padding:5px 12px; cursor:pointer; font-size:11px; font-family:inherit; white-space:nowrap; }
+.btn-unlock:hover { background:#2E7D32; }
+.btn-relock  { background:#E53935; color:#fff; border:none; border-radius:4px; padding:4px 10px; cursor:pointer; font-size:11px; font-family:inherit; }
+.btn-relock:hover { background:#C62828; }
+.admin-login-area { padding:16px 0; }
+.admin-pw-row { display:flex; gap:6px; margin-top:8px; }
+.admin-pw-input { flex:1; border:1px solid #ccc; border-radius:4px; padding:6px 10px; font-size:13px; font-family:inherit; outline:none; }
+.admin-pw-input:focus { border-color:#1976D2; }
+.btn-admin-login { background:#1976D2; color:#fff; border:none; border-radius:4px; padding:6px 16px; cursor:pointer; font-size:12px; font-family:inherit; }
+.btn-admin-login:hover { background:#1565C0; }
+
 /* 색상 선택 툴바 */
 .color-picker-bar {
   display:flex; align-items:center; gap:6px;
@@ -370,6 +392,7 @@ input:checked + .slider:before { transform:translateX(18px); }
     <button class="btn btn-secondary" onclick="openAccum()">📈 누적 집계</button>
     <button class="btn btn-secondary" onclick="openSettlement()">📊 결산</button>
     <button class="btn btn-secondary" onclick="openRecord()">📋 기록</button>
+    <button class="btn btn-secondary" id="adminPanelBtn" onclick="openAdminPanel()" style="color:#7B1FA2;border-color:#CE93D8;">🔑 관리자</button>
     <button class="btn btn-secondary" onclick="openSettings()">⚙ 설정</button>
   </div>
 </div>
@@ -610,9 +633,86 @@ input:checked + .slider:before { transform:translateX(18px); }
         <div><div class="setting-label">모든 데이터 초기화</div><div class="setting-desc">저장된 모든 기록과 품목을 삭제합니다</div></div>
         <button class="btn-danger" onclick="resetAllData()" style="font-size:11px;">전체 초기화</button>
       </div>
+
+      <!-- 관리자 비밀번호 변경 -->
+      <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+        <div>
+          <div class="setting-label">🔑 관리자 비밀번호 변경</div>
+          <div class="setting-desc">현재 비밀번호 확인 후 새 비밀번호로 변경합니다</div>
+        </div>
+        <div style="width:100%;display:flex;flex-direction:column;gap:7px;" id="pwChangeArea">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:#555;width:90px;flex-shrink:0;">현재 비밀번호</span>
+            <input type="password" id="pwCurrent" placeholder="현재 비밀번호"
+              style="flex:1;border:1px solid #ccc;border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;outline:none;"
+              onkeydown="if(event.key==='Enter')document.getElementById('pwNew').focus()">
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:#555;width:90px;flex-shrink:0;">새 비밀번호</span>
+            <input type="password" id="pwNew" placeholder="새 비밀번호"
+              style="flex:1;border:1px solid #ccc;border-radius:4px;padding:5px 8px;font-size:12px;font-family:inherit;outline:none;"
+              onkeydown="if(event.key==='Enter')changeAdminPassword()">
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:#555;width:90px;flex-shrink:0;"></span>
+            <button onclick="changeAdminPassword()"
+              style="padding:6px 18px;background:#7B1FA2;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-family:inherit;font-weight:600;">
+              변경
+            </button>
+            <span id="pwChangeMsg" style="font-size:11px;min-height:16px;"></span>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-save" onclick="closeModal('settingsOverlay')">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     팝업 6: 관리자 패널 (날짜별 잠금 해제/설정)
+════════════════════════════════════════════ -->
+<div class="overlay" id="adminOverlay" onclick="overlayClick(event,'adminOverlay')">
+  <div class="modal" style="width:420px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" style="color:#7B1FA2;">🔑 관리자 패널 — 날짜 잠금 관리</div>
+        <div class="modal-sub">특정 날짜의 잠금을 해제하면 사용자가 직접 수정할 수 있습니다</div>
+      </div>
+      <button class="modal-close" onclick="closeAdminPanel()">✕</button>
+    </div>
+    <div class="modal-body" id="adminModalBody" style="min-height:200px;">
+      <!-- 로그인 전 -->
+      <div id="adminLoginArea" class="admin-login-area">
+        <div style="font-size:12px;color:#555;margin-bottom:4px;">관리자 비밀번호를 입력하세요</div>
+        <div class="admin-pw-row">
+          <input type="password" class="admin-pw-input" id="adminPwInput" placeholder="비밀번호" onkeydown="if(event.key==='Enter')adminLogin()">
+          <button class="btn-admin-login" onclick="adminLogin()">확인</button>
+        </div>
+        <div id="adminLoginMsg" style="font-size:11px;color:#e53935;margin-top:6px;min-height:16px;"></div>
+      </div>
+      <!-- 로그인 후 -->
+      <div id="adminContent" style="display:none;">
+        <div style="font-size:11px;color:#888;margin-bottom:10px;">
+          🟢 관리자 모드 — 날짜를 선택해 잠금 해제/설정하세요
+        </div>
+        <!-- 현재 잠금 해제된 날짜 목록 -->
+        <div style="font-size:11px;font-weight:600;color:#444;margin-bottom:6px;">📋 잠금 해제된 날짜 목록</div>
+        <ul class="unlock-list" id="unlockDateList">
+          <li style="color:#bbb;font-size:11px;justify-content:center;padding:16px 0;">잠금 해제된 날짜가 없습니다</li>
+        </ul>
+        <!-- 새 날짜 잠금 해제 -->
+        <div class="admin-unlock-row">
+          <input type="date" class="admin-date-pick" id="adminDatePick">
+          <button class="btn-unlock" onclick="adminUnlockDate()">🔓 잠금 해제</button>
+        </div>
+        <div style="font-size:10px;color:#aaa;margin-top:6px;">해제된 날짜는 사용자 기기에서 즉시 편집 가능해집니다</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeAdminPanel()">닫기</button>
+      <button id="adminLogoutBtn" class="btn-danger" onclick="adminLogout()" style="display:none;">로그아웃</button>
     </div>
   </div>
 </div>
@@ -736,6 +836,17 @@ const CATS = [
 ];
 
 const COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
+
+// 분류별 컬럼 반환 (일부 분류는 별도 지점 구성)
+function colsForCat(cat) {
+  if (cat === "도안(케익)") {
+    return ["도안점","둔산점","갤러리아점","유성점","건양대점","둔곡점","포장실"];
+  }
+  if (cat === "도안(빵,파이2)") {
+    return ["도안점","유성점","건양대점","갤러리아점","둔산점(토)","둔곡점","포장실"];
+  }
+  return COLS;
+}
 
 // ── 판매가 (제품명 → 원) ──
 let PRICES = {};
@@ -1003,6 +1114,16 @@ function _applyRemoteData(data) {
     savedDays = data.savedDays; saveSavedDays(); changed = true;
   }
 
+  // unlockedDates — 관리자가 해제/잠금한 날짜 목록 실시간 반영
+  if (data.unlockedDates !== undefined) {
+    const nu = data.unlockedDates || {};
+    if (JSON.stringify(nu) !== JSON.stringify(unlockedDates)) {
+      unlockedDates = nu; saveUnlockedDates();
+      updateReadOnlyBanner();
+      changed = true;
+    }
+  }
+
   if (changed) {
     renderMainTable(); updateSummary();
     if (badge) badge.innerHTML = '☁️ <span style="color:#388E3C;">실시간 동기화 ✓</span>';
@@ -1031,7 +1152,7 @@ function _startSSE() {
         const parts = msg.path.replace(/^\//, '').split('/');
         const synthetic = JSON.parse(JSON.stringify({
           catData, inputData, memos, records,
-          prices: PRICES, savedDays, productColors, qtyColors
+          prices: PRICES, savedDays, productColors, qtyColors, unlockedDates
         }));
         // 경로 디코딩 후 데이터 삽입
         const decode = s => decodeURIComponent(s.replace(/%([0-9A-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h,16))));
@@ -1062,7 +1183,7 @@ function _startSSE() {
       // patch 이벤트도 동일하게 처리
       const synthetic = JSON.parse(JSON.stringify({
         catData, inputData, memos, records,
-        prices: PRICES, savedDays, productColors, qtyColors
+        prices: PRICES, savedDays, productColors, qtyColors, unlockedDates
       }));
       if (msg.path === '/' || msg.path === '') {
         Object.assign(synthetic, msg.data || {});
@@ -1197,6 +1318,7 @@ async function loadFromCloud() {
   }
   if (data.productColors) { productColors = data.productColors || {}; saveProductColors(); }
   if (data.qtyColors !== undefined) { qtyColors = data.qtyColors || {}; saveQtyColors(); }
+  if (data.unlockedDates !== undefined) { unlockedDates = data.unlockedDates || {}; saveUnlockedDates(); }
   return true;
 }
 
@@ -1261,9 +1383,23 @@ function renderMainTable() {
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
   const items = catData[currentCat] || [];
+  const curCols = colsForCat(currentCat);
+  const lastColIdx = curCols.length - 1;
+
+  // 헤더 동적 렌더링
+  const thead = document.querySelector('.main-table thead tr');
+  if (thead) {
+    thead.innerHTML = `
+      <th style="width:28px;"></th>
+      <th class="col-product">제품명</th>
+      <th style="background:#FFF9C4;white-space:nowrap;min-width:80px;">판매가(원)</th>
+      ${curCols.map((col, ci) => `<th${ci===lastColIdx?' style="background:#FFEBEE;"':''}>${col}</th>`).join('')}
+      <th>비고</th>
+    `;
+  }
 
   if (!items.length) {
-    tbody.innerHTML = `<tr><td colspan="12" style="text-align:center;padding:24px;color:#aaa;">이 분류에 등록된 품목이 없습니다. '목록·항목 수정'으로 추가하세요.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${3 + curCols.length + 1}" style="text-align:center;padding:24px;color:#aaa;">이 분류에 등록된 품목이 없습니다. '목록·항목 수정'으로 추가하세요.</td></tr>`;
     updateSummary(); return;
   }
 
@@ -1294,12 +1430,12 @@ function renderMainTable() {
         oninput="this.value=this.value.replace(/[^0-9]/g,'')">
     </td>`;
 
-    COLS.forEach((col, ci) => {
+    curCols.forEach((col, ci) => {
       const v = getInput(currentCat, name, col);
-      const bg = ci===6 ? 'background:#FFF8F8;' : '';
+      const bg = ci===lastColIdx ? 'background:#FFF8F8;' : '';
       const colorKey = `${currentCat}__${name}__${col}`;
       const savedBg = _qColors[colorKey] || '';
-      const inlineStyle = savedBg ? `background:${savedBg};` : (ci===6 ? 'background:#FFF8F8;' : '');
+      const inlineStyle = savedBg ? `background:${savedBg};` : (ci===lastColIdx ? 'background:#FFF8F8;' : '');
       const roAttr = isDateReadOnly() ? 'readonly disabled style="' + inlineStyle + 'opacity:0.7;cursor:not-allowed;"' : 'style="' + inlineStyle + '"';
       cells += `<td style="${bg}padding:3px 2px;">
         <input class="qty-box${savedBg?' color-selected':''}" type="number" min="0" value="${v}"
@@ -1513,7 +1649,7 @@ function updateSummary() {
   let filled=0, totalProd=0, ship=0;
   const curItems = catData[currentCat]||[];
   curItems.forEach(name=>{
-    COLS.forEach((col)=>{
+    colsForCat(currentCat).forEach((col)=>{
       const v=getInput(currentCat,name,col);
       if(v>0){ filled++; ship+=v; }
     });
@@ -1522,7 +1658,7 @@ function updateSummary() {
   CATS.forEach(cat=>{
     const items = catData[cat]||[];
     items.forEach(name=>{
-      COLS.forEach((col)=>{
+      colsForCat(cat).forEach((col)=>{
         const v=getInput(cat,name,col);
         totalProd+=v;
       });
@@ -1535,46 +1671,192 @@ function updateSummary() {
 }
 
 // ══════════════════════════════════════════
-// 날짜별 읽기 전용 모드 (관리자 비밀번호: hare1234)
+// 날짜별 잠금 시스템 (Firebase 기반)
+// - unlockedDates: Firebase /data/unlockedDates/{YYYY-MM-DD} = true
+// - 관리자가 해제한 날짜만 사용자가 편집 가능
 // ══════════════════════════════════════════
-const ADMIN_PW = 'hare1234';
-let _adminUnlocked = false; // 잠금 해제 상태
+function _loadAdminPw() {
+  try { const s = localStorage.getItem('adminPw'); return s || 'hare1234'; } catch(e) { return 'hare1234'; }
+}
+function _saveAdminPw(pw) { try { localStorage.setItem('adminPw', pw); } catch(e) {} }
+let ADMIN_PW = _loadAdminPw();
 
+// 관리자 비밀번호 변경 (설정 팝업에서 호출)
+function changeAdminPassword() {
+  const cur = document.getElementById('pwCurrent').value;
+  const nw  = document.getElementById('pwNew').value;
+  const msg = document.getElementById('pwChangeMsg');
+
+  if (!cur) { _setPwMsg(msg, '현재 비밀번호를 입력하세요', false); return; }
+  if (cur !== ADMIN_PW) { _setPwMsg(msg, '❌ 현재 비밀번호가 틀렸습니다', false); document.getElementById('pwCurrent').value=''; return; }
+  if (!nw)  { _setPwMsg(msg, '새 비밀번호를 입력하세요', false); return; }
+  if (nw === cur) { _setPwMsg(msg, '현재 비밀번호와 동일합니다', false); return; }
+
+  ADMIN_PW = nw;
+  _saveAdminPw(nw);
+  // 변경 후 패널 로그아웃 처리 (새 비번으로 재인증 유도)
+  _isAdminLoggedIn = false;
+
+  document.getElementById('pwCurrent').value = '';
+  document.getElementById('pwNew').value = '';
+  _setPwMsg(msg, '✅ 변경 완료', true);
+  showToast('✅ 관리자 비밀번호가 변경되었습니다');
+}
+function _setPwMsg(el, text, ok) {
+  el.textContent = text;
+  el.style.color = ok ? '#2E7D32' : '#e53935';
+  setTimeout(() => { if (el.textContent === text) el.textContent = ''; }, 3000);
+}
+
+let _isAdminLoggedIn = false;   // 관리자 패널 로그인 여부 (팝업용)
+let unlockedDates = {};         // { "YYYY-MM-DD": true } — Firebase 동기화
+
+function loadUnlockedDates() {
+  try { const s = localStorage.getItem('unlockedDates'); return s ? JSON.parse(s) : {}; } catch(e) { return {}; }
+}
+function saveUnlockedDates() { try { localStorage.setItem('unlockedDates', JSON.stringify(unlockedDates)); } catch(e) {} }
+
+unlockedDates = loadUnlockedDates();
+
+// 날짜가 읽기 전용인지 판단
 function isDateReadOnly() {
-  if (_adminUnlocked) return false;
-  return getCurrentDateKey() !== getTodayStr();
+  const dateKey = getCurrentDateKey();
+  if (dateKey === getTodayStr()) return false;          // 오늘은 항상 편집 가능
+  return !unlockedDates[dateKey];                       // 관리자가 해제한 날짜만 편집 가능
 }
 
-function checkAdminAndEdit(callback) {
-  if (_adminUnlocked) { callback(); return; }
-  const pw = prompt('🔐 이전 날짜 데이터 수정은 관리자만 가능합니다.\n비밀번호를 입력하세요:');
-  if (pw === ADMIN_PW) {
-    _adminUnlocked = true;
-    showToast('✅ 관리자 모드 활성화');
-    callback();
-  } else if (pw !== null) {
-    showToast('❌ 비밀번호가 올바르지 않습니다');
-  }
+// Firebase에 잠금 해제 상태 저장
+function cloudPushUnlockDate(dateKey, unlocked) {
+  const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+  const path = `/data/unlockedDates/${esc(dateKey)}`;
+  return _putPath(path, unlocked ? true : null);
 }
 
+// readOnlyBanner: 사용자용 안내 배너
 function updateReadOnlyBanner() {
   let banner = document.getElementById('readOnlyBanner');
   if (!banner) {
     banner = document.createElement('div');
     banner.id = 'readOnlyBanner';
-    banner.style.cssText = 'margin:6px 16px;padding:8px 16px;background:#FFF3E0;border:1px solid #FFB74D;border-radius:4px;font-size:12px;color:#E65100;display:flex;align-items:center;justify-content:space-between;';
+    banner.style.cssText = 'margin:6px 16px;padding:8px 16px;border-radius:4px;font-size:12px;display:flex;align-items:center;justify-content:space-between;';
     const noticeEl = document.querySelector('.notice-banner');
     if (noticeEl) noticeEl.after(banner);
   }
-  if (isDateReadOnly()) {
-    const dateStr = getCurrentDateKey();
-    banner.innerHTML = `<span>🔒 <strong>${dateStr}</strong> — 이전 날짜 데이터입니다. 수정하려면 관리자 인증이 필요합니다.</span>
-      <button onclick="checkAdminAndEdit(()=>{ renderMainTable(); updateReadOnlyBanner(); })" 
-        style="padding:4px 12px;background:#F57C00;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-family:inherit;">🔓 관리자 잠금 해제</button>`;
+  const dateKey = getCurrentDateKey();
+  if (dateKey === getTodayStr()) {
+    banner.style.display = 'none';
+    return;
+  }
+  if (!unlockedDates[dateKey]) {
+    // 잠금 상태 — 사용자에게 안내
+    banner.style.cssText = banner.style.cssText.replace(/background:[^;]+;?/g,'') + 'background:#FFF3E0;border:1px solid #FFB74D;color:#E65100;';
+    banner.innerHTML = `<span>🔒 <strong>${dateKey}</strong> — 잠금 상태입니다. 수정이 필요하면 관리자에게 잠금 해제를 요청하세요.</span>`;
     banner.style.display = 'flex';
   } else {
-    banner.style.display = 'none';
+    // 잠금 해제됨 — 편집 가능 안내
+    banner.style.cssText = banner.style.cssText.replace(/background:[^;]+;?/g,'') + 'background:#E8F5E9;border:1px solid #A5D6A7;color:#2E7D32;';
+    banner.innerHTML = `<span>🔓 <strong>${dateKey}</strong> — 관리자가 잠금을 해제했습니다. 수정 후 관리자에게 다시 잠금을 요청하세요.</span>`;
+    banner.style.display = 'flex';
   }
+}
+
+// ══════════════════════════════════════════
+// 관리자 패널 함수들
+// ══════════════════════════════════════════
+function openAdminPanel() {
+  // 날짜 기본값: 어제
+  const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
+  const yy = yesterday.getFullYear();
+  const ym = String(yesterday.getMonth()+1).padStart(2,'0');
+  const yd = String(yesterday.getDate()).padStart(2,'0');
+  document.getElementById('adminDatePick').value = `${yy}-${ym}-${yd}`;
+
+  if (_isAdminLoggedIn) {
+    document.getElementById('adminLoginArea').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    document.getElementById('adminLogoutBtn').style.display = 'inline-block';
+    renderUnlockList();
+  } else {
+    document.getElementById('adminLoginArea').style.display = 'block';
+    document.getElementById('adminContent').style.display = 'none';
+    document.getElementById('adminLogoutBtn').style.display = 'none';
+    document.getElementById('adminLoginMsg').textContent = '';
+    document.getElementById('adminPwInput').value = '';
+    setTimeout(() => document.getElementById('adminPwInput').focus(), 100);
+  }
+  openModal('adminOverlay');
+}
+
+function closeAdminPanel() {
+  closeModal('adminOverlay');
+}
+
+function adminLogin() {
+  const pw = document.getElementById('adminPwInput').value;
+  if (pw === ADMIN_PW) {
+    _isAdminLoggedIn = true;
+    document.getElementById('adminLoginArea').style.display = 'none';
+    document.getElementById('adminContent').style.display = 'block';
+    document.getElementById('adminLogoutBtn').style.display = 'inline-block';
+    renderUnlockList();
+  } else {
+    document.getElementById('adminLoginMsg').textContent = '❌ 비밀번호가 올바르지 않습니다';
+    document.getElementById('adminPwInput').value = '';
+    document.getElementById('adminPwInput').focus();
+  }
+}
+
+function adminLogout() {
+  _isAdminLoggedIn = false;
+  document.getElementById('adminLoginArea').style.display = 'block';
+  document.getElementById('adminContent').style.display = 'none';
+  document.getElementById('adminLogoutBtn').style.display = 'none';
+  document.getElementById('adminLoginMsg').textContent = '';
+  document.getElementById('adminPwInput').value = '';
+}
+
+function renderUnlockList() {
+  const ul = document.getElementById('unlockDateList');
+  const dates = Object.keys(unlockedDates).filter(d => unlockedDates[d]).sort().reverse();
+  if (!dates.length) {
+    ul.innerHTML = `<li style="color:#bbb;font-size:11px;justify-content:center;padding:16px 0;">잠금 해제된 날짜가 없습니다</li>`;
+    return;
+  }
+  ul.innerHTML = dates.map(d => `
+    <li>
+      <span class="unlock-date-badge">📅 ${d} <span class="unlock-status open">편집 가능</span></span>
+      <button class="btn-relock" onclick="adminRelockDate('${d}')">🔒 다시 잠금</button>
+    </li>`).join('');
+}
+
+async function adminUnlockDate() {
+  if (!_isAdminLoggedIn) return;
+  const dateKey = document.getElementById('adminDatePick').value;
+  if (!dateKey) { showToast('⚠️ 날짜를 선택하세요'); return; }
+  if (dateKey === getTodayStr()) { showToast('⚠️ 오늘 날짜는 항상 편집 가능합니다'); return; }
+  unlockedDates[dateKey] = true;
+  saveUnlockedDates();
+  await cloudPushUnlockDate(dateKey, true);
+  renderUnlockList();
+  // 현재 보고 있는 날짜가 같으면 즉시 테이블 갱신
+  if (getCurrentDateKey() === dateKey) {
+    renderMainTable();
+    updateReadOnlyBanner();
+  }
+  showToast(`✅ ${dateKey} 잠금 해제 완료`);
+}
+
+async function adminRelockDate(dateKey) {
+  if (!_isAdminLoggedIn) return;
+  delete unlockedDates[dateKey];
+  saveUnlockedDates();
+  await cloudPushUnlockDate(dateKey, false);
+  renderUnlockList();
+  if (getCurrentDateKey() === dateKey) {
+    renderMainTable();
+    updateReadOnlyBanner();
+  }
+  showToast(`🔒 ${dateKey} 다시 잠금 완료`);
 }
 
 function getTodayStr() {
@@ -1595,7 +1877,6 @@ function updateHeaderDate() {
   document.getElementById('headerSub').innerHTML = `${str} &nbsp;● 시스 진행중`;
 }
 document.getElementById('dateInput').addEventListener('change', () => {
-  _adminUnlocked = false; // 날짜 바뀌면 잠금 재설정
   updateHeaderDate();
   renderMainTable();
   updateSummary();
@@ -1616,7 +1897,6 @@ document.getElementById('dateInput').addEventListener('change', () => {
   const n=new Date(), ms=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1,0,0,1)-n;
   setTimeout(()=>{
     document.getElementById('dateInput').value=getTodayStr();
-    _adminUnlocked = false;
     updateHeaderDate();
     renderMainTable();
     updateReadOnlyBanner();
@@ -1783,7 +2063,6 @@ function getInputRange(cat, name, col) {
 
 function renderSettlement(store) {
   const cats = SETT_STORE_CATS[store] || [];
-  const OUT_COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
   const el = document.getElementById('settlementContent');
   let html = '', grandQty = 0, grandAmt = 0;
 
@@ -1792,6 +2071,7 @@ function renderSettlement(store) {
 
   cats.forEach(cat => {
     const items = catData[cat] || [];
+    const catCols = colsForCat(cat);
     let catQty = 0, catAmt = 0, dateBlocks = '';
 
     if (dateKeys.length === 0) {
@@ -1800,7 +2080,7 @@ function renderSettlement(store) {
       dateKeys.forEach(d => {
         let rowNum = 1, rows = '';
         items.forEach(name => {
-          const dQty = OUT_COLS.reduce((sum, c) => {
+          const dQty = catCols.reduce((sum, c) => {
             const v = (inputData[d]&&inputData[d][cat]&&inputData[d][cat][name]) ? (inputData[d][cat][name][c]||0) : 0;
             return sum + v;
           }, 0);
@@ -2138,15 +2418,15 @@ function exportAccumCSV() {
 function exportSettlementCSV() {
   const store = _currentSettTab;
   const cats  = SETT_STORE_CATS[store] || [];
-  const OUT_COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
   // 파일명에 기간 포함
   const periodSuffix = _settMode === 'month'
     ? _settFromDate.substring(0,7)
     : `${_settFromDate}_${_settToDate}`;
   let csv = '분류,제품명,판매가,출고합계,금액\n';
   cats.forEach(cat => {
+    const catCols = colsForCat(cat);
     (catData[cat]||[]).forEach(name => {
-      const qty = OUT_COLS.reduce((sum, c) => sum + (getInputRange(cat, name, c) || 0), 0);
+      const qty = catCols.reduce((sum, c) => sum + (getInputRange(cat, name, c) || 0), 0);
       if (qty <= 0) return;
       const price = PRICES[name] || 0;
       csv += `${cat},${name},${price},${qty},${qty*price}\n`;
@@ -2198,7 +2478,7 @@ async function _doSaveData() {
   const date = document.getElementById('dateInput').value;
   const items = catData[currentCat]||[];
   let ship = 0;
-  items.forEach(name => { COLS.forEach(col => { ship += getInput(currentCat, name, col); }); });
+  items.forEach(name => { colsForCat(currentCat).forEach(col => { ship += getInput(currentCat, name, col); }); });
 
   const rec = { date, cat: currentCat, items: items.length, prod: 0, ship, ts: Date.now() };
 
@@ -2232,7 +2512,7 @@ async function doReset() {
   const dateKey = getCurrentDateKey();
   const items = catData[currentCat]||[];
   // 로컬 초기화
-  items.forEach(name => { COLS.forEach(col => setInput(currentCat, name, col, 0)); });
+  items.forEach(name => { colsForCat(currentCat).forEach(col => setInput(currentCat, name, col, 0)); });
   saveInputData();
   // 해당 분류 날짜 경로만 null PUT (다른 사용자의 다른 분류 데이터 건드리지 않음)
   const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
@@ -2258,11 +2538,14 @@ function exportCSV() {
     return s;
   }
 
-  let csv = `날짜,분류,제품명,${COLS.join(',')},비고\n`;
+  // 모든 컬럼 목록 (중복 없이) — CSV 헤더용
+  const allCols = [...new Set(CATS.flatMap(cat => colsForCat(cat)))];
+  let csv = `날짜,분류,제품명,${allCols.join(',')},비고\n`;
 
   CATS.forEach(cat=>{
+    const catCols = colsForCat(cat);
     (catData[cat]||[]).forEach(name=>{
-      const vals = COLS.map(col=>getInput(cat,name,col));
+      const vals = allCols.map(col => catCols.includes(col) ? getInput(cat,name,col) : '');
       const memoKey = cat + '__' + name;
       const memo = memos[memoKey] || '';
       csv += `${csvCell(date)},${csvCell(cat)},${csvCell(name)},${vals.join(',')},${csvCell(memo)}\n`;
@@ -2499,6 +2782,10 @@ function openSettings() {
     st.textContent = '⚠️ 아직 설정되지 않음 (로컬 저장만 사용 중)';
     st.style.color = '#F57C00';
   }
+  // 비밀번호 변경 필드 초기화
+  document.getElementById('pwCurrent').value = '';
+  document.getElementById('pwNew').value = '';
+  document.getElementById('pwChangeMsg').textContent = '';
   openModal('settingsOverlay');
 }
 
@@ -2731,3 +3018,4 @@ function testSave() {
 </script>
 </body>
 </html>
+
