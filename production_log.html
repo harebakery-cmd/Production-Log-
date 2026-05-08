@@ -150,8 +150,6 @@ input:checked + .slider:before { transform:translateX(18px); }
 .btn-danger { background:#e53935; color:#fff; border:none; border-radius:4px; padding:5px 14px; cursor:pointer; font-size:11px; font-family:inherit; }
 .btn-danger:hover { background:#c62828; }
 
-/* 수량 입력 박스 — 위쪽 정의 사용 (중복 제거) */
-
 /* 판매가 입력 */
 .price-input { border:none; text-align:right; background:transparent; font-size:11px; font-family:inherit; outline:none; width:72px; min-width:60px; display:block; color:#555; padding:4px 6px; }
 .price-input:focus { background:#FFF9C4; border-radius:3px; }
@@ -904,6 +902,55 @@ const CATS = [
   "갤러리아(빵,파이1)","갤러리아(빵,파이2)","갤러리아(케익)"
 ];
 
+// ══════════════════════════════════════════
+// [수정 1] 분류 화면 표시 이름 재정의
+// 내부 데이터 키("마카롱,다쿠아즈")는 절대 변경하지 않음
+// 화면에 표시되는 레이블만 "선물용 및 다대"로 변경
+// ══════════════════════════════════════════
+const CAT_DISPLAY_LABELS = {
+  "마카롱,다쿠아즈": "선물용 및 다대"
+};
+function getCatDisplayLabel(cat) {
+  return CAT_DISPLAY_LABELS[cat] || cat;
+}
+
+// ══════════════════════════════════════════
+// [수정 2] 제품명 고정 색상 정의
+// "마카롱,다쿠아즈" / "쿠키,쨈" 분류의 특정 제품명에
+// 날짜·사용자 설정과 무관하게 항상 동일한 배경색 적용
+// ══════════════════════════════════════════
+const FIXED_PRODUCT_COLORS = {
+  // ── 마카롱,다쿠아즈 ──────────────────────
+  // 하늘색 (#D1ECF1)
+  "우유모찌롤":   "#D1ECF1",
+  "초코모찌롤":   "#D1ECF1",
+  "말차모찌롤":   "#D1ECF1",
+  "밀봉":         "#D1ECF1",
+  "휘낭시에":     "#D1ECF1",
+  "레몬시트롱":   "#D1ECF1",
+  // 핑크색 (#F8D7DA)
+  "미니오렌지살구": "#F8D7DA",
+  // 연두색 (#D4EDDA)
+  "미니살라망드":   "#D4EDDA",
+
+  // ── 쿠키,쨈 ──────────────────────────────
+  // 하늘색 (#D1ECF1)
+  "곰돌이쿠키":   "#D1ECF1",
+  "하트쿠키":     "#D1ECF1",
+  "복샌드쿠키":   "#D1ECF1",
+  "말쿠키":       "#D1ECF1",
+  "샤브레":       "#D1ECF1",
+  "초코샤브레":   "#D1ECF1",
+  // 핑크색 (#F8D7DA)
+  "땅콩쿠키":     "#F8D7DA",
+  "바통":         "#F8D7DA",
+  // 연두색 (#D4EDDA)
+  "쉘":           "#D4EDDA",
+  "뽀로":         "#D4EDDA",
+};
+// 고정 색상을 적용할 분류 집합
+const FIXED_COLOR_CATS = new Set(["마카롱,다쿠아즈", "쿠키,쨈"]);
+
 const COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
 
 // 분류별 컬럼 반환 (일부 분류는 별도 지점 구성)
@@ -921,16 +968,12 @@ function colsForCat(cat) {
 let PRICES = {};
 function loadPrices()  {
   try {
-    // production_log(3) 키
     const s = localStorage.getItem('priceData');
     if (s) PRICES = JSON.parse(s);
-    // production_log(1) 키 — 없으면 병합 시도
     const legacy = localStorage.getItem('customPrices');
     if (legacy) {
       const lp = JSON.parse(legacy);
-      // 기존에 없는 항목만 추가 (덮어쓰기 방지)
       Object.keys(lp).forEach(k => { if (!PRICES[k]) PRICES[k] = lp[k]; });
-      // 통합된 데이터를 priceData에 저장
       localStorage.setItem('priceData', JSON.stringify(PRICES));
     }
   } catch(e) {}
@@ -969,18 +1012,14 @@ function saveCatData() {
 
 // ══════════════════════════════════════════
 // Firebase Realtime Database 동기화 (v2)
-// ── SSE 실시간 스트리밍 + 세분화 경로 저장 ──
 // ══════════════════════════════════════════
 const FB_URL = 'https://project-production-log-default-rtdb.firebaseio.com';
 
-// 클라이언트 고유 ID (탭 구별용 — 자신이 쓴 변경은 SSE에서 무시)
 const _clientId = Math.random().toString(36).slice(2, 8) + '_' + Date.now().toString(36);
 
-// ── 경로별 독립 잠금 맵 (경로 충돌 방지) ──
-const _pathLocks  = {};   // path → true/false
-const _pathQueues = {};   // path → 최신 대기 값
+const _pathLocks  = {};
+const _pathQueues = {};
 
-// 단일 경로에 PUT (가장 작은 단위 저장 — 동시 경쟁 없음)
 async function _putPath(path, value) {
   const url = FB_URL + path + '.json';
   if (_pathLocks[path]) {
@@ -1002,15 +1041,13 @@ async function _putPath(path, value) {
     if (_pathQueues[path] !== undefined) {
       const next = _pathQueues[path];
       delete _pathQueues[path];
-      // 대기 중인 최신 값을 이어서 반영 (지연 없음)
       _putPath(path, next);
     }
   }
   return ok;
 }
 
-// ── 낙관적 PATCH (여러 최상위 필드 동시 업데이트 — 기존 호환용) ──
-let _saveLock  = false;  // 하위 호환: cloudSave 직렬화용
+let _saveLock  = false;
 let _saveQueue = null;
 
 function _buildSavePayload(data) {
@@ -1018,7 +1055,6 @@ function _buildSavePayload(data) {
   if (Array.isArray(payload.records) && payload.records.length === 0) {
     payload.records = null; payload._recordsCleared = Date.now();
   } else { payload._recordsCleared = null; }
-  // 색상은 날짜별 중첩 구조 — 최상위가 날짜 키이므로 null 처리 제거 (날짜별 독립)
   if (payload.prices && Object.keys(payload.prices||{}).length === 0) {
     payload.prices = null; payload._pricesCleared = Date.now();
   } else { payload._pricesCleared = null; }
@@ -1044,14 +1080,12 @@ async function cloudSave(data) {
     _saveLock = false;
     if (_saveQueue) {
       const next = _saveQueue; _saveQueue = null;
-      // 대기 데이터 즉시 처리 (지연 없음)
       cloudSave(next);
     }
   }
   return ok;
 }
 
-// ── 전체 로드 (초기 1회) ──
 async function cloudLoad() {
   try {
     const r = await fetch(FB_URL + '/data.json');
@@ -1061,70 +1095,47 @@ async function cloudLoad() {
   } catch(e) { return null; }
 }
 
-// ════════════════════════════════════════════
-// 세분화 경로 저장 함수들
-// (inputData의 특정 셀 1개만 PUT → 다른 사용자 데이터와 충돌 없음)
-// ════════════════════════════════════════════
-
-// 입력값 단일 셀 저장: /data/inputData/날짜/분류/제품명/컬럼
 function cloudPushCell(dateKey, cat, name, col, val) {
-  // Firebase key에 사용 불가 문자 인코딩 (., $, #, [, ], /)
   const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
   const path = `/data/inputData/${esc(dateKey)}/${esc(cat)}/${esc(name)}/${esc(col)}`;
   return _putPath(path, val === 0 ? null : val);
 }
 
-// 판매가 단일 항목 저장
 function cloudPushPrice(name, val) {
   const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
   const path = `/data/prices/${esc(name)}`;
   return _putPath(path, val || null);
 }
 
-// 색상 단일 키 저장 (날짜별 구조: type/날짜/키)
-// key는 이미 "날짜/원본키" 형태로 전달됨
 function cloudPushColor(type, key, val) {
-  // key = "2026-04-20/분류__제품명" 형태
-  // "/" 는 Firebase 경로 구분자이므로 이스케이프 제외
   const escSeg = s => s.replace(/[.$#\[\]]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
-  // key를 "/" 기준으로 분리하여 각 세그먼트만 이스케이프
   const pathSegs = key.split('/').map(escSeg).join('/');
   const path = `/data/${type}/${pathSegs}`;
   return _putPath(path, val || null);
 }
 
-// 메모 단일 키 저장
 function cloudPushMemo(key, val) {
   const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
   const path = `/data/memos/${esc(key)}`;
   return _putPath(path, val || null);
 }
 
-// ════════════════════════════════════════════
-// SSE 실시간 스트리밍 (Firebase .json?&sse=true)
-// — 폴링 완전 제거, 변경 즉시 수신 (~100ms)
-// ════════════════════════════════════════════
 let _sseSource  = null;
 let _sseRetries = 0;
 const SSE_MAX_RETRY = 5;
 
-// SSE로 수신한 원격 변경을 로컬에 병합 (포커스 셀 보호)
 function _applyRemoteData(data) {
   if (!data || typeof data !== 'object') return;
-
-  // 자신이 쓴 변경이면 무시 (에코 방지)
   if (data._cid === _clientId) return;
 
   const badge = document.getElementById('cloudBadge');
   let changed = false;
 
-  // catData
   if (data.catData && JSON.stringify(data.catData) !== JSON.stringify(catData)) {
     catData = data.catData; saveCatData();
     renderCatGrid(); renderMainTable(); updateCurrentBar(); changed = true;
   }
 
-  // inputData — 포커스 셀 값 보호
   if (data.inputData) {
     const focused    = document.activeElement;
     const fCat       = focused && focused.dataset && focused.dataset.cat;
@@ -1145,18 +1156,15 @@ function _applyRemoteData(data) {
     }
   }
 
-  // memos
   if (data.memos && JSON.stringify(data.memos) !== JSON.stringify(memos)) {
     memos = data.memos; saveMemos(); changed = true;
   }
 
-  // records
   const remRec = Array.isArray(data.records) ? data.records : [];
   if (JSON.stringify(remRec) !== JSON.stringify(records)) {
     records = remRec; saveRecords(); changed = true;
   }
 
-  // prices
   if (data.prices !== undefined) {
     const np = data.prices || {};
     if (JSON.stringify(np) !== JSON.stringify(PRICES)) {
@@ -1164,7 +1172,6 @@ function _applyRemoteData(data) {
     }
   }
 
-  // productColors / qtyColors (날짜별 중첩 구조)
   if (data.productColors !== undefined) {
     const nc = data.productColors || {};
     if (JSON.stringify(nc) !== JSON.stringify(productColors)) {
@@ -1178,12 +1185,10 @@ function _applyRemoteData(data) {
     }
   }
 
-  // savedDays
   if (typeof data.savedDays === 'number' && data.savedDays !== savedDays) {
     savedDays = data.savedDays; saveSavedDays(); changed = true;
   }
 
-  // unlockedDates — 관리자가 해제/잠금한 날짜 목록 실시간 반영
   if (data.unlockedDates !== undefined) {
     const nu = data.unlockedDates || {};
     if (JSON.stringify(nu) !== JSON.stringify(unlockedDates)) {
@@ -1198,7 +1203,6 @@ function _applyRemoteData(data) {
     if (badge) badge.innerHTML = '☁️ <span style="color:#388E3C;">실시간 동기화 ✓</span>';
     showToast('🔄 실시간 반영됨');
   }
-  // 마카롱 세부 별도 병합
   _applyMacaronDetailRemote(data);
 }
 
@@ -1214,18 +1218,14 @@ function _startSSE() {
     _sseRetries = 0;
     try {
       const msg = JSON.parse(e.data);
-      // path === '/' → 전체 데이터 (초기 or reset)
-      // path === '/inputData/...' 등 → 하위 경로 변경
       if (msg.path === '/') {
         _applyRemoteData(msg.data);
       } else {
-        // 하위 경로 변경: 로컬 데이터에 병합 후 applyRemoteData
         const parts = msg.path.replace(/^\//, '').split('/');
         const synthetic = JSON.parse(JSON.stringify({
           catData, inputData, memos, records,
           prices: PRICES, savedDays, productColors, qtyColors, unlockedDates
         }));
-        // 경로 디코딩 후 데이터 삽입
         const decode = s => decodeURIComponent(s.replace(/%([0-9A-F]{2})/g, (_, h) => String.fromCharCode(parseInt(h,16))));
         const decodedParts = parts.map(decode);
         let obj = synthetic;
@@ -1240,7 +1240,6 @@ function _startSSE() {
         } else {
           obj[lastKey] = msg.data;
         }
-        // _cid 체크를 위해 최상위 메타 보존
         synthetic._cid = (msg.data && msg.data._cid) || '';
         _applyRemoteData(synthetic);
       }
@@ -1251,7 +1250,6 @@ function _startSSE() {
     _sseRetries = 0;
     try {
       const msg = JSON.parse(e.data);
-      // patch 이벤트도 동일하게 처리
       const synthetic = JSON.parse(JSON.stringify({
         catData, inputData, memos, records,
         prices: PRICES, savedDays, productColors, qtyColors, unlockedDates
@@ -1303,7 +1301,6 @@ function saveRecords()   { try{localStorage.setItem('records',JSON.stringify(rec
 function loadSavedDays() { try{ const s=localStorage.getItem('savedDays'); return s?parseInt(s,10):0; }catch(e){return 0;} }
 function saveSavedDays() { try{localStorage.setItem('savedDays',String(savedDays));}catch(e){} }
 
-// ── 세분화 전체 저장: 각 데이터를 독립 경로에 PUT → 동시 저장 충돌 없음 ──
 async function saveAll() {
   saveCatData(); saveInputData(); saveMemos(); saveRecords();
   savePrices(); saveSavedDays(); saveProductColors(); saveQtyColors();
@@ -1319,28 +1316,23 @@ async function saveAll() {
   return results.every(Boolean);
 }
 
-// ── records 전용 안전 저장: 원격 최신본과 병합 후 PUT (동시 저장 누락 방지) ──
 async function _safePushRecords(newRecord) {
   const path = '/data/records';
   if (_pathLocks[path]) { _pathQueues[path] = newRecord; return true; }
   _pathLocks[path] = true;
   let ok = false;
   try {
-    // 1) 원격 최신 records 읽기
     const r = await fetch(FB_URL + path + '.json');
     let remote = [];
     if (r.ok) { const j = await r.json(); remote = Array.isArray(j) ? j : []; }
-    // 2) 로컬 + 원격 병합 (ts 기준 중복 제거)
     const merged = [...records];
     const localTs = new Set(merged.map(x => x.ts));
     remote.forEach(x => { if (!localTs.has(x.ts)) merged.push(x); });
     merged.sort((a, b) => (b.ts||0) - (a.ts||0));
-    // 3) 새 기록 추가
     if (newRecord && !localTs.has(newRecord.ts)) merged.unshift(newRecord);
     if (merged.length > 100) merged.length = 100;
     records = merged;
     saveRecords();
-    // 4) 병합 결과를 PUT
     const wr = await fetch(FB_URL + path + '.json', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -1365,7 +1357,6 @@ async function loadFromCloud() {
   if (data.catData)   { catData = data.catData;     saveCatData(); }
   if (data.inputData) { inputData = data.inputData; saveInputData(); }
   if (data.memos)     { memos = data.memos;         saveMemos(); }
-  // records: null(Firebase 빈배열 저장) 또는 _recordsCleared 플래그 → 빈 배열로 처리
   if (Array.isArray(data.records)) {
     records = data.records; saveRecords();
   } else if (data.records === null || data._recordsCleared) {
@@ -1374,7 +1365,6 @@ async function loadFromCloud() {
   if (typeof data.savedDays === 'number') {
     savedDays = data.savedDays; saveSavedDays();
   }
-  // prices: 항상 클라우드 우선 (빈 객체도 포함)
   if (data.prices !== undefined && data.prices !== null) {
     const legacy = localStorage.getItem('customPrices');
     if (legacy) {
@@ -1414,7 +1404,8 @@ function renderCatGrid() {
   CATS.forEach(cat => {
     const cell = document.createElement('div');
     cell.className = 'cat-cell' + (cat===currentCat?' active':'');
-    cell.innerHTML = `${cat}`;
+    // [수정 1 적용] 화면 표시는 getCatDisplayLabel() 사용, 내부 키(cat)는 그대로 유지
+    cell.innerHTML = `${getCatDisplayLabel(cat)}`;
     cell.addEventListener('click', ()=>selectCat(cat));
     grid.appendChild(cell);
   });
@@ -1428,16 +1419,15 @@ function selectCat(cat) {
 }
 
 function updateCurrentBar() {
-  document.getElementById('currentCatLabel').textContent = currentCat;
+  // [수정 1 적용] 현재 분류 바에도 표시명 사용
+  document.getElementById('currentCatLabel').textContent = getCatDisplayLabel(currentCat);
   document.getElementById('currentCatCount').textContent = '';
 }
 
-// ── 현재 선택된 날짜 키 반환 ──
 function getCurrentDateKey() {
   return document.getElementById('dateInput').value || getTodayStr();
 }
 
-// ── 날짜별 독립 저장: inputData[date][cat][name][col] ──
 function getInput(cat, name, col) {
   const d = getCurrentDateKey();
   return (inputData[d]&&inputData[d][cat]&&inputData[d][cat][name]&&inputData[d][cat][name][col]!==undefined)
@@ -1458,7 +1448,6 @@ function renderMainTable() {
   const curCols = colsForCat(currentCat);
   const lastColIdx = curCols.length - 1;
 
-  // 헤더 동적 렌더링
   const thead = document.querySelector('.main-table thead tr');
   if (thead) {
     thead.innerHTML = `
@@ -1486,13 +1475,22 @@ function renderMainTable() {
     const dateKey = getCurrentDateKey();
     const _pColors = getProductColorsForDate(dateKey);
     const _qColors = getQtyColorsForDate(dateKey);
-    const savedProductBg = _pColors[productColorKey] || '';
+
+    // ══════════════════════════════════════
+    // [수정 2 적용] 제품명 셀 배경색 결정 로직
+    // 우선순위: 고정색상 > 사용자 설정 색상
+    // 고정색상 대상: FIXED_COLOR_CATS에 속하는 분류의 FIXED_PRODUCT_COLORS에 등록된 제품명
+    // ══════════════════════════════════════
+    const _fixedColor = FIXED_COLOR_CATS.has(currentCat)
+      ? (FIXED_PRODUCT_COLORS[name] || '')
+      : '';
+    const savedProductBg = _fixedColor || _pColors[productColorKey] || '';
+
     const isMacaronItem = (currentCat === '마카롱,다쿠아즈' && name === '마카롱류');
     const dblClickAttr = isMacaronItem ? ` ondblclick="openMacaronDetail('${name.replace(/'/g,"\\'")}',event)"` : '';
     const dblClickHint = isMacaronItem ? ' title="더블클릭: 세부 입력"' : '';
     cells += `<td class="col-product" data-product-key="${productColorKey}" style="${savedProductBg ? 'background:'+savedProductBg+';' : ''}" onclick="onProductCellClick(this)"${dblClickAttr}${dblClickHint}>${name}${isMacaronItem ? ' <span style="font-size:9px;color:#aaa;">[더블클릭]</span>' : ''}</td>`;
 
-    // 판매가 셀
     const pv = PRICES[name] || 0;
     const priceRo = isDateReadOnly() ? 'readonly disabled style="opacity:0.7;cursor:not-allowed;"' : '';
     cells += `<td style="background:#FFFDE7;padding:0;min-width:80px;">
@@ -1540,15 +1538,12 @@ function onInputChange(el) {
   updateSummary();
   if (autoSave) {
     saveInputData();
-    // 셀 단위 즉시 저장 — 디바운스 없음, 다른 사용자 데이터와 충돌 없음
     cloudPushCell(getCurrentDateKey(), cat, name, col, v);
   }
 }
 
 // ══════════════════════════════════════════
 // 수량 입력칸 색상 기능 (날짜별 독립 저장)
-// 구조: qtyColors[날짜][분류__제품명__컬럼]
-//       productColors[날짜][분류__제품명]
 // ══════════════════════════════════════════
 let qtyColors = JSON.parse(localStorage.getItem('qtyColors')||'{}');
 let productColors = JSON.parse(localStorage.getItem('productColors')||'{}');
@@ -1559,9 +1554,6 @@ let _activeColorSwatch = null;
 function saveQtyColors() { localStorage.setItem('qtyColors', JSON.stringify(qtyColors)); }
 function saveProductColors() { localStorage.setItem('productColors', JSON.stringify(productColors)); }
 
-// ── 구 형식 마이그레이션 (1회 실행)
-// 구 형식: { "분류__제품명__컬럼": "#색상코드" }
-// 신 형식: { "2026-04-20": { "분류__제품명__컬럼": "#색상코드" } }
 (function _migrateColorData() {
   const n = new Date();
   const today = n.getFullYear() + '-'
@@ -1569,7 +1561,6 @@ function saveProductColors() { localStorage.setItem('productColors', JSON.string
     + String(n.getDate()).padStart(2,'0');
   const isDateKey = k => /^\d{4}-\d{2}-\d{2}$/.test(k);
 
-  // qtyColors 마이그레이션
   if (Object.keys(qtyColors).some(k => !isDateKey(k))) {
     const migrated = {};
     Object.entries(qtyColors).forEach(([k, v]) => {
@@ -1582,7 +1573,6 @@ function saveProductColors() { localStorage.setItem('productColors', JSON.string
     qtyColors = migrated;
     saveQtyColors();
   }
-  // productColors 마이그레이션
   if (Object.keys(productColors).some(k => !isDateKey(k))) {
     const migrated = {};
     Object.entries(productColors).forEach(([k, v]) => {
@@ -1597,22 +1587,18 @@ function saveProductColors() { localStorage.setItem('productColors', JSON.string
   }
 })();
 
-// 현재 날짜의 qtyColors 맵 반환 (없으면 빈 객체)
 function getQtyColorsForDate(dateKey) {
   return (qtyColors[dateKey] && typeof qtyColors[dateKey] === 'object') ? qtyColors[dateKey] : {};
 }
-// 현재 날짜의 productColors 맵 반환
 function getProductColorsForDate(dateKey) {
   return (productColors[dateKey] && typeof productColors[dateKey] === 'object') ? productColors[dateKey] : {};
 }
-// 현재 날짜에 qtyColor 설정
 function setQtyColor(dateKey, key, color) {
   if (!qtyColors[dateKey]) qtyColors[dateKey] = {};
   if (color) qtyColors[dateKey][key] = color;
   else delete qtyColors[dateKey][key];
   saveQtyColors();
 }
-// 현재 날짜에 productColor 설정
 function setProductColor(dateKey, key, color) {
   if (!productColors[dateKey]) productColors[dateKey] = {};
   if (color) productColors[dateKey][key] = color;
@@ -1621,7 +1607,6 @@ function setProductColor(dateKey, key, color) {
 }
 
 function onProductCellClick(el) {
-  // 이전 포커스 표시 제거
   if (_selectedQtyEl) {
     _selectedQtyEl.classList.remove('focus-target');
     _selectedQtyEl = null;
@@ -1636,7 +1621,6 @@ function onProductCellClick(el) {
 }
 
 function onQtyFocus(el) {
-  // 이전 포커스 표시 제거
   if (_selectedQtyEl && _selectedQtyEl !== el) {
     _selectedQtyEl.classList.remove('focus-target');
   }
@@ -1652,7 +1636,6 @@ function onQtyFocus(el) {
 
 function selectColor(swatchEl) {
   const color = swatchEl.dataset.color;
-  // 스와치 활성화 표시
   document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
   swatchEl.classList.add('active');
   _activeColorSwatch = swatchEl;
@@ -1660,6 +1643,17 @@ function selectColor(swatchEl) {
   const dateKey = getCurrentDateKey();
 
   if (_selectedProductEl) {
+    // 고정 색상 분류의 고정 색상 제품은 사용자 색상 변경 불가 안내
+    const productKey = _selectedProductEl.dataset.productKey || '';
+    const productName = productKey.split('__')[1] || '';
+    if (FIXED_COLOR_CATS.has(currentCat) && FIXED_PRODUCT_COLORS[productName]) {
+      _selectedProductEl.style.outline = '';
+      _selectedProductEl = null;
+      const hint = document.getElementById('colorPickerHint');
+      if (hint) hint.textContent = '⚠ 이 제품은 고정 색상이 적용됩니다';
+      setTimeout(() => { if(hint) hint.textContent = '제품명 또는 입력칸을 먼저 클릭하세요'; }, 2000);
+      return;
+    }
     _selectedProductEl.style.background = color;
     _selectedProductEl.style.outline = '';
     const key = _selectedProductEl.dataset.productKey;
@@ -1694,6 +1688,16 @@ function clearColor() {
   _activeColorSwatch = null;
   const dateKey = getCurrentDateKey();
   if (_selectedProductEl) {
+    const productKey = _selectedProductEl.dataset.productKey || '';
+    const productName = productKey.split('__')[1] || '';
+    if (FIXED_COLOR_CATS.has(currentCat) && FIXED_PRODUCT_COLORS[productName]) {
+      _selectedProductEl.style.outline = '';
+      _selectedProductEl = null;
+      const hint = document.getElementById('colorPickerHint');
+      if (hint) hint.textContent = '⚠ 이 제품은 고정 색상이 적용됩니다';
+      setTimeout(() => { if(hint) hint.textContent = '제품명 또는 입력칸을 먼저 클릭하세요'; }, 2000);
+      return;
+    }
     _selectedProductEl.style.background = '';
     _selectedProductEl.style.outline = '';
     const key = _selectedProductEl.dataset.productKey;
@@ -1720,7 +1724,6 @@ function clearColor() {
 }
 
 function updateSummary() {
-  // 전체 분류 기준으로 생산 합계 집계
   let filled=0, totalProd=0, ship=0;
   const curItems = catData[currentCat]||[];
   curItems.forEach(name=>{
@@ -1729,7 +1732,6 @@ function updateSummary() {
       if(v>0){ filled++; ship+=v; }
     });
   });
-  // 전체 분류의 모든 값 합산 (총 생산 합계)
   CATS.forEach(cat=>{
     const items = catData[cat]||[];
     items.forEach(name=>{
@@ -1746,9 +1748,7 @@ function updateSummary() {
 }
 
 // ══════════════════════════════════════════
-// 날짜별 잠금 시스템 (Firebase 기반)
-// - unlockedDates: Firebase /data/unlockedDates/{YYYY-MM-DD} = true
-// - 관리자가 해제한 날짜만 사용자가 편집 가능
+// 날짜별 잠금 시스템
 // ══════════════════════════════════════════
 function _loadAdminPw() {
   try { const s = localStorage.getItem('adminPw'); return s || 'hare1234'; } catch(e) { return 'hare1234'; }
@@ -1756,7 +1756,6 @@ function _loadAdminPw() {
 function _saveAdminPw(pw) { try { localStorage.setItem('adminPw', pw); } catch(e) {} }
 let ADMIN_PW = _loadAdminPw();
 
-// 관리자 비밀번호 변경 (설정 팝업에서 호출)
 function changeAdminPassword() {
   const cur = document.getElementById('pwCurrent').value;
   const nw  = document.getElementById('pwNew').value;
@@ -1769,7 +1768,6 @@ function changeAdminPassword() {
 
   ADMIN_PW = nw;
   _saveAdminPw(nw);
-  // 변경 후 패널 로그아웃 처리 (새 비번으로 재인증 유도)
   _isAdminLoggedIn = false;
 
   document.getElementById('pwCurrent').value = '';
@@ -1783,8 +1781,8 @@ function _setPwMsg(el, text, ok) {
   setTimeout(() => { if (el.textContent === text) el.textContent = ''; }, 3000);
 }
 
-let _isAdminLoggedIn = false;   // 관리자 패널 로그인 여부 (팝업용)
-let unlockedDates = {};         // { "YYYY-MM-DD": true } — Firebase 동기화
+let _isAdminLoggedIn = false;
+let unlockedDates = {};
 
 function loadUnlockedDates() {
   try { const s = localStorage.getItem('unlockedDates'); return s ? JSON.parse(s) : {}; } catch(e) { return {}; }
@@ -1793,21 +1791,18 @@ function saveUnlockedDates() { try { localStorage.setItem('unlockedDates', JSON.
 
 unlockedDates = loadUnlockedDates();
 
-// 날짜가 읽기 전용인지 판단
 function isDateReadOnly() {
   const dateKey = getCurrentDateKey();
-  if (dateKey === getTodayStr()) return false;          // 오늘은 항상 편집 가능
-  return !unlockedDates[dateKey];                       // 관리자가 해제한 날짜만 편집 가능
+  if (dateKey === getTodayStr()) return false;
+  return !unlockedDates[dateKey];
 }
 
-// Firebase에 잠금 해제 상태 저장
 function cloudPushUnlockDate(dateKey, unlocked) {
   const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
   const path = `/data/unlockedDates/${esc(dateKey)}`;
   return _putPath(path, unlocked ? true : null);
 }
 
-// readOnlyBanner: 사용자용 안내 배너
 function updateReadOnlyBanner() {
   let banner = document.getElementById('readOnlyBanner');
   if (!banner) {
@@ -1823,12 +1818,10 @@ function updateReadOnlyBanner() {
     return;
   }
   if (!unlockedDates[dateKey]) {
-    // 잠금 상태 — 사용자에게 안내
     banner.style.cssText = banner.style.cssText.replace(/background:[^;]+;?/g,'') + 'background:#FFF3E0;border:1px solid #FFB74D;color:#E65100;';
     banner.innerHTML = `<span>🔒 <strong>${dateKey}</strong> — 잠금 상태입니다. 수정이 필요하면 관리자에게 잠금 해제를 요청하세요.</span>`;
     banner.style.display = 'flex';
   } else {
-    // 잠금 해제됨 — 편집 가능 안내
     banner.style.cssText = banner.style.cssText.replace(/background:[^;]+;?/g,'') + 'background:#E8F5E9;border:1px solid #A5D6A7;color:#2E7D32;';
     banner.innerHTML = `<span>🔓 <strong>${dateKey}</strong> — 관리자가 잠금을 해제했습니다. 수정 후 관리자에게 다시 잠금을 요청하세요.</span>`;
     banner.style.display = 'flex';
@@ -1836,10 +1829,9 @@ function updateReadOnlyBanner() {
 }
 
 // ══════════════════════════════════════════
-// 관리자 패널 함수들
+// 관리자 패널
 // ══════════════════════════════════════════
 function openAdminPanel() {
-  // 날짜 기본값: 어제
   const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
   const yy = yesterday.getFullYear();
   const ym = String(yesterday.getMonth()+1).padStart(2,'0');
@@ -1913,7 +1905,6 @@ async function adminUnlockDate() {
   saveUnlockedDates();
   await cloudPushUnlockDate(dateKey, true);
   renderUnlockList();
-  // 현재 보고 있는 날짜가 같으면 즉시 테이블 갱신
   if (getCurrentDateKey() === dateKey) {
     renderMainTable();
     updateReadOnlyBanner();
@@ -1957,17 +1948,14 @@ document.getElementById('dateInput').addEventListener('change', () => {
   updateSummary();
   updateReadOnlyBanner();
 });
-// 오늘 날짜로 초기화
 (function initDate(){
   const di = document.getElementById('dateInput');
   di.value = getTodayStr();
   updateHeaderDate();
-  // 설정 옵션 텍스트도 오늘 날짜로
   const [y,m,d] = getTodayStr().split('-');
   const op = document.getElementById('dateFmtSelect');
   if(op){ op.options[0].text=`${y}년 ${m}월 ${d}일`; op.options[1].text=`${y}/${m}/${d}`; op.options[2].text=`${y}-${m}-${d}`; }
 })();
-// 자정 자동 갱신
 (function schedMidnight(){
   const n=new Date(), ms=new Date(n.getFullYear(),n.getMonth(),n.getDate()+1,0,0,1)-n;
   setTimeout(()=>{
@@ -1983,40 +1971,36 @@ document.getElementById('dateInput').addEventListener('change', () => {
 // 판매가 blur 핸들러
 // ══════════════════════════════════════════
 function onPriceBlur(el) {
-  if (el.disabled) return; // 읽기 전용 날짜에서는 무시
+  if (el.disabled) return;
   const name = el.dataset.name;
   const raw = parseInt(el.value) || 0;
   el.dataset.raw = raw;
   if (raw > 0) { PRICES[name] = raw; el.value = raw.toLocaleString()+'원'; }
   else         { delete PRICES[name]; el.value = ''; }
   savePrices();
-  // 판매가 단일 경로 즉시 저장
   cloudPushPrice(name, raw > 0 ? raw : null);
 }
 
 // ══════════════════════════════════════════
 // 결산 기능
 // ══════════════════════════════════════════
-// 지점별 → 담당 분류 매핑
 const SETT_STORE_CATS = {
   '도안점':    ['도안(빵,파이1)','도안(빵,파이2)','도안(케익)','공방','마카롱,다쿠아즈','쿠키,쨈'],
   '둔산점':    ['둔산(빵,파이1)','둔산(빵,파이2)','둔산(케익)'],
   '갤러리아점':['갤러리아(빵,파이1)','갤러리아(빵,파이2)','갤러리아(케익)'],
 };
-// 지점명 → 컬럼명 매핑
 const SETT_STORE_COL = { '도안점':'도안점', '둔산점':'둔산점', '갤러리아점':'갤러리아점' };
 
 let _currentSettTab = '도안점';
-let _settMode = 'month';       // 'month' | 'range'
-let _settFromDate = '';        // YYYY-MM-DD
-let _settToDate   = '';        // YYYY-MM-DD
+let _settMode = 'month';
+let _settFromDate = '';
+let _settToDate   = '';
 
 function _initSettYearSel() {
   const sel = document.getElementById('settYearSel');
   if (!sel) return;
   sel.innerHTML = '';
   const thisYear = new Date().getFullYear();
-  // 현재 연도 기준 ±2년 범위
   for (let y = thisYear - 2; y <= thisYear + 1; y++) {
     const op = document.createElement('option');
     op.value = y; op.textContent = y + '년';
@@ -2025,9 +2009,6 @@ function _initSettYearSel() {
   sel.value = thisYear;
 }
 
-// ══════════════════════════════════════════
-// 결산 — 관리자 비밀번호 인증 게이트
-// ══════════════════════════════════════════
 function openSettlementAuth() {
   document.getElementById('settlementAuthPw').value = '';
   document.getElementById('settlementAuthMsg').textContent = '';
@@ -2053,7 +2034,6 @@ function openSettlement() {
   document.querySelectorAll('.sett-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('sttab-도안점').classList.add('active');
 
-  // 연도·월 셀렉트 초기화
   _initSettYearSel();
   const di = document.getElementById('dateInput').value || getTodayStr();
   const [cy, cm] = di.substring(0,7).split('-');
@@ -2119,24 +2099,16 @@ function _updateSettPeriodInfo() {
   } else {
     const [fy,fm,fd] = _settFromDate.split('-');
     const [ty,tm,td] = _settToDate.split('-');
-    // 같은 달이면 "3월 1일 ~ 15일"
     if (fy===ty && fm===tm) {
       el.textContent = `📌 ${parseInt(fm)}월 ${parseInt(fd)}일 ~ ${parseInt(td)}일`;
     } else {
       el.textContent = `📌 ${parseInt(fm)}월 ${parseInt(fd)}일 ~ ${parseInt(tm)}월 ${parseInt(td)}일`;
     }
   }
-  // 결산 부제목도 업데이트
   const lbl = document.getElementById('settlementMonthLabel');
   if (lbl) lbl.textContent = document.getElementById('settPeriodInfo').textContent.replace('📌 ','') + ' 결산 — 출고량 × 판매가';
 }
 
-// 전체 초기화(설정)도 날짜별 구조 유지
-
-
-// records에서 해당 기간에 저장된 날짜 목록 수집 (미래: 날짜별 상세 결산용)
-// 현재는 inputData (현재 입력 기준) 그대로 사용하되
-// 기간 필터 정보를 화면에 표시하는 형태로 동작
 function selectSettTab(store) {
   _currentSettTab = store;
   document.querySelectorAll('.sett-tab').forEach(t => t.classList.remove('active'));
@@ -2144,13 +2116,11 @@ function selectSettTab(store) {
   renderSettlement(store);
 }
 
-// 기간 내 날짜 목록 반환
 function _settDateKeys() {
   const keys = Object.keys(inputData).filter(d => d >= _settFromDate && d <= _settToDate);
   return keys;
 }
 
-// 기간 합산 getInput
 function getInputRange(cat, name, col) {
   return _settDateKeys().reduce((sum, d) => {
     const v = (inputData[d]&&inputData[d][cat]&&inputData[d][cat][name]) ? (inputData[d][cat][name][col]||0) : 0;
@@ -2164,7 +2134,7 @@ function renderSettlement(store) {
   let html = '', grandQty = 0, grandAmt = 0;
 
   const periodTxt = (document.getElementById('settPeriodInfo')||{}).textContent || '';
-  const dateKeys = _settDateKeys().sort(); // 오름차순 날짜
+  const dateKeys = _settDateKeys().sort();
 
   cats.forEach(cat => {
     const items = catData[cat] || [];
@@ -2193,7 +2163,7 @@ function renderSettlement(store) {
             <td style="color:#388E3C;font-weight:bold;">${dAmt > 0 ? dAmt.toLocaleString()+'원' : '—'}</td>
           </tr>`;
         });
-        if (!rows) return; // 이 날짜에 해당 분류 출고 없으면 스킵
+        if (!rows) return;
         dateBlocks += `
           <div style="background:#E8F0FE;border-left:4px solid #1976D2;padding:6px 12px;margin:8px 0 0;border-radius:0 4px 4px 0;font-size:12px;font-weight:700;color:#1565C0;">📅 ${d}</div>
           <table class="sett-table">
@@ -2211,7 +2181,6 @@ function renderSettlement(store) {
       if (!dateBlocks) {
         dateBlocks = `<div style="text-align:center;color:#bbb;padding:16px;font-size:11px;">출고 수량 없음</div>`;
       } else {
-        // 분류 소계
         dateBlocks += `
           <table class="sett-table" style="margin-top:6px;">
             <tbody>
@@ -2226,17 +2195,17 @@ function renderSettlement(store) {
     }
 
     grandQty += catQty; grandAmt += catAmt;
+    // [수정 1 적용] 결산 내 분류명도 표시명 사용
     html += `
     <div class="sett-group">
       <div class="sett-group-title">
-        <span>📂 ${cat}</span>
+        <span>📂 ${getCatDisplayLabel(cat)}</span>
         <span style="font-size:11px;color:#555;">${catQty.toLocaleString()}개 &nbsp;/&nbsp; ${catAmt > 0 ? catAmt.toLocaleString()+'원' : '—'}</span>
       </div>
       ${dateBlocks}
     </div>`;
   });
 
-  // 전체 합계 행
   const periodLabel = periodTxt.replace('📌 ','') || '합계';
   html += `
   <table class="sett-table" style="margin-top:8px;">
@@ -2253,8 +2222,6 @@ function renderSettlement(store) {
   el.innerHTML = html;
 }
 
-
-
 // ══════════════════════════════════════════
 // 누적 집계 기능
 // ══════════════════════════════════════════
@@ -2265,7 +2232,6 @@ let _accumToDate   = '';
 function openAccum() {
   _accumMode = 'month';
 
-  // 연도 옵션 초기화
   const ySel = document.getElementById('accumYearSel');
   ySel.innerHTML = '';
   const thisYear = new Date().getFullYear();
@@ -2276,7 +2242,6 @@ function openAccum() {
   }
   ySel.value = thisYear;
 
-  // 현재 날짜 기준 월 설정
   const di = document.getElementById('dateInput').value || getTodayStr();
   const [cy, cm] = di.substring(0, 7).split('-');
   document.getElementById('accumYearSel').value  = cy;
@@ -2287,12 +2252,13 @@ function openAccum() {
   document.getElementById('accumMonthArea').style.display = 'flex';
   document.getElementById('accumRangeArea').style.display = 'none';
 
-  // 분류 필터 옵션
   const cf = document.getElementById('accumCatFilter');
   cf.innerHTML = '<option value="__ALL__">전체 분류</option>';
   CATS.forEach(c => {
     const op = document.createElement('option');
-    op.value = c; op.textContent = c;
+    op.value = c;
+    // [수정 1 적용] 누적 집계 분류 필터에도 표시명 사용
+    op.textContent = getCatDisplayLabel(c);
     cf.appendChild(op);
   });
 
@@ -2313,7 +2279,6 @@ function setAccumMode(mode) {
     document.getElementById('accumModeRange').classList.add('active');
     document.getElementById('accumMonthArea').style.display = 'none';
     document.getElementById('accumRangeArea').style.display = 'flex';
-    // 기본값: 현재 설정된 날짜 범위
     document.getElementById('accumFromDate').value = _accumFromDate;
     document.getElementById('accumToDate').value   = _accumToDate;
   }
@@ -2359,12 +2324,10 @@ function _updateAccumPeriodInfo() {
   if (sub) sub.textContent = (el.textContent.replace('📌 ', '')) + ' — 지점별 수량 누적 합계';
 }
 
-// 집계 기간 내 날짜 키 목록
 function _accumDateKeys() {
   return Object.keys(inputData).filter(d => d >= _accumFromDate && d <= _accumToDate).sort();
 }
 
-// cat+name+col 기간 합산
 function getAccumVal(cat, name, col) {
   return _accumDateKeys().reduce((sum, d) => {
     const v = (inputData[d] && inputData[d][cat] && inputData[d][cat][name])
@@ -2379,10 +2342,8 @@ function renderAccum() {
   const catFilter = document.getElementById('accumCatFilter').value;
   const targetCats = catFilter === '__ALL__' ? CATS : [catFilter];
 
-  // 지점 열
   const storeCols = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
 
-  // 전체 합계 누산
   const grandStore = Object.fromEntries(storeCols.map(c => [c, 0]));
   let grandTotal = 0;
 
@@ -2397,18 +2358,16 @@ function renderAccum() {
     const items = catData[cat] || [];
     if (!items.length) return;
 
-    // 이 분류의 지점별 소계
     const catStore = Object.fromEntries(storeCols.map(c => [c, 0]));
     let catTotal = 0;
 
-    // 품목별 행 생성
     let rowsHtml = '';
     let rowIdx = 1;
 
     items.forEach(name => {
       const storeVals = storeCols.map(col => getAccumVal(cat, name, col));
       const rowTotal  = storeVals.reduce((s, v) => s + v, 0);
-      if (rowTotal === 0) return; // 0이면 행 생략
+      if (rowTotal === 0) return;
 
       storeCols.forEach((col, i) => { catStore[col] += storeVals[i]; });
       catTotal += rowTotal;
@@ -2425,19 +2384,18 @@ function renderAccum() {
       </tr>`;
     });
 
-    if (!rowsHtml) return; // 이 분류 전체 0이면 스킵
+    if (!rowsHtml) return;
 
-    // 분류 소계행
     const catSubCells = storeCols.map(col =>
       `<td>${catStore[col] > 0 ? catStore[col].toLocaleString() : '—'}</td>`
     ).join('');
 
-    // 전체 누산
     storeCols.forEach(col => { grandStore[col] += catStore[col]; });
     grandTotal += catTotal;
 
+    // [수정 1 적용] 누적 집계 분류 헤더에도 표시명 사용
     html += `
-    <div class="accum-cat-header">📂 ${cat} &nbsp;<span style="font-size:11px;font-weight:normal;color:#555;">총 ${catTotal.toLocaleString()}개</span></div>
+    <div class="accum-cat-header">📂 ${getCatDisplayLabel(cat)} &nbsp;<span style="font-size:11px;font-weight:normal;color:#555;">총 ${catTotal.toLocaleString()}개</span></div>
     <table class="accum-table">
       <thead>
         <tr>
@@ -2463,7 +2421,6 @@ function renderAccum() {
     return;
   }
 
-  // 전체 합계 행
   const grandCells = storeCols.map(col =>
     `<td>${grandStore[col] > 0 ? grandStore[col].toLocaleString() : '—'}</td>`
   ).join('');
@@ -2488,21 +2445,18 @@ function renderAccum() {
 // ══════════════════════════════════════════
 // 마카롱 / 다쿠아즈 세부 입력 팝업
 // ══════════════════════════════════════════
-// 저장 구조: macaronDetail[dateKey][productName] = { items:[{name, price, 둔산점, ...}] }
 const MACARON_DETAIL_COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점"];
 
-let _macaronDetailProduct = ''; // 현재 팝업 열린 제품명
+let _macaronDetailProduct = '';
 
 function _loadMacaronDetail() {
   try { return JSON.parse(localStorage.getItem('macaronDetail') || '{}'); } catch(e) { return {}; }
 }
 function _saveMacaronDetailStore(data) {
   localStorage.setItem('macaronDetail', JSON.stringify(data));
-  // Firebase 동기화
   _putPath('/data/macaronDetail', data);
 }
 
-// SSE 수신 시 macaronDetail도 병합 (기존 _applyRemoteData 내부에서 호출)
 function _applyMacaronDetailRemote(data) {
   if (!data || !data.macaronDetail) return;
   const local = _loadMacaronDetail();
@@ -2530,7 +2484,6 @@ function _renderMacaronDetailTable(items) {
   tbody.innerHTML = '';
 
   if (!items.length) {
-    // 기본 5개 빈 행
     for (let i = 0; i < 5; i++) _appendMacaronRow(tbody, {}, i);
   } else {
     items.forEach((item, i) => _appendMacaronRow(tbody, item, i));
@@ -2564,7 +2517,6 @@ function addMacaronDetailRow() {
   const tbody = document.getElementById('macaronDetailBody');
   const idx = tbody.children.length;
   _appendMacaronRow(tbody, {}, idx);
-  // 스크롤 아래로
   const modal = document.getElementById('macaronDetailOverlay').querySelector('.modal-body');
   modal.scrollTop = modal.scrollHeight;
 }
@@ -2574,7 +2526,7 @@ function saveMacaronDetail() {
   const items = [];
   rows.forEach(tr => {
     const nameEl = tr.querySelector('[data-field="name"]');
-    if (!nameEl || !nameEl.value.trim()) return; // 빈 행 스킵
+    if (!nameEl || !nameEl.value.trim()) return;
     const item = {
       name: nameEl.value.trim()
     };
@@ -2614,17 +2566,14 @@ function exportMacaronDetailExcel() {
   const dateKey = getCurrentDateKey();
   const cols = MACARON_DETAIL_COLS;
 
-  // 헤더
   let csv = `제품명,${cols.join(',')},합계\n`;
 
-  // 데이터 행
   items.forEach(item => {
     const vals = cols.map(c => item[c] || 0);
     const total = vals.reduce((s, v) => s + v, 0);
     csv += `${item.name},${vals.join(',')},${total}\n`;
   });
 
-  // 합계 행
   const colTotals = cols.map(c => items.reduce((s, it) => s + (it[c] || 0), 0));
   const grandTotal = colTotals.reduce((s, v) => s + v, 0);
   csv += `합 계,${colTotals.join(',')},${grandTotal}\n`;
@@ -2663,11 +2612,9 @@ function exportAccumCSV() {
   showToast('누적 집계 CSV 다운로드 완료');
 }
 
-
 function exportSettlementCSV() {
   const store = _currentSettTab;
   const cats  = SETT_STORE_CATS[store] || [];
-  // 파일명에 기간 포함
   const periodSuffix = _settMode === 'month'
     ? _settFromDate.substring(0,7)
     : `${_settFromDate}_${_settToDate}`;
@@ -2685,29 +2632,6 @@ function exportSettlementCSV() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `결산_${store}_${periodSuffix}.csv`; a.click();
   showToast(`${store} 결산 CSV 다운로드 완료`);
-}
-
-// ══════════════════════════════════════════
-// 파일로 저장 (품목 변경 영구 반영)
-// ══════════════════════════════════════════
-function saveFile() {
-  const catLines = Object.entries(catData)
-    .map(([k,v]) => '    ' + JSON.stringify(k) + ': ' + JSON.stringify(v))
-    .join(',\n');
-  const metaLines = Object.entries(catMeta)
-    .map(([k,v]) => '    ' + JSON.stringify(k) + ': ' + JSON.stringify(v))
-    .join(',\n');
-  const newCatFunc  = 'function defaultCatData() {\n  return {\n' + catLines + ',\n  };\n}';
-  const newMetaFunc = 'function defaultCatMeta() {\n  return {\n' + metaLines + '\n  };\n}';
-  let src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-  src = src.replace(/function defaultCatData\(\)\s*\{[\s\S]*?\n\}/, newCatFunc);
-  src = src.replace(/function defaultCatMeta\(\)\s*\{[\s\S]*?\n\}/, newMetaFunc);
-  const blob = new Blob([src], {type:'text/html;charset=utf-8'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'production_log.html'; a.click();
-  URL.revokeObjectURL(url);
-  showToast('📁 파일 저장 완료! 다운받은 파일을 앞으로 사용하세요.');
 }
 
 // ══════════════════════════════════════════
@@ -2731,12 +2655,10 @@ async function _doSaveData() {
 
   const rec = { date, cat: currentCat, items: items.length, prod: 0, ship, ts: Date.now() };
 
-  // savedDays +1
   savedDays++;
   saveSavedDays();
   updateSummary();
 
-  // 병렬 저장: inputData/catData/etc는 세분화 PUT, records는 read-merge-write로 안전 저장
   const [syncedMain, syncedRec, syncedDays] = await Promise.all([
     saveAll(),
     _safePushRecords(rec),
@@ -2754,16 +2676,15 @@ function confirmReset() {
   _doConfirmReset();
 }
 function _doConfirmReset() {
-  document.getElementById('resetCatName').textContent = currentCat;
+  // [수정 1 적용] 초기화 확인 팝업에도 표시명 사용
+  document.getElementById('resetCatName').textContent = getCatDisplayLabel(currentCat);
   openModal('resetOverlay');
 }
 async function doReset() {
   const dateKey = getCurrentDateKey();
   const items = catData[currentCat]||[];
-  // 로컬 초기화
   items.forEach(name => { colsForCat(currentCat).forEach(col => setInput(currentCat, name, col, 0)); });
   saveInputData();
-  // 해당 분류 날짜 경로만 null PUT (다른 사용자의 다른 분류 데이터 건드리지 않음)
   const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
   await _putPath(`/data/inputData/${esc(dateKey)}/${esc(currentCat)}`, null);
   closeModal('resetOverlay');
@@ -2778,7 +2699,6 @@ async function doReset() {
 function exportCSV() {
   const date = document.getElementById('dateInput').value;
 
-  // 쉼표·줄바꿈·따옴표가 포함된 셀을 안전하게 감싸는 함수
   function csvCell(val) {
     const s = String(val == null ? '' : val);
     if (s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r')) {
@@ -2787,7 +2707,6 @@ function exportCSV() {
     return s;
   }
 
-  // 모든 컬럼 목록 (중복 없이) — CSV 헤더용
   const allCols = [...new Set(CATS.flatMap(cat => colsForCat(cat)))];
   let csv = `날짜,분류,제품명,${allCols.join(',')},비고\n`;
 
@@ -2815,7 +2734,8 @@ function exportCSV() {
 // 목록·항목 수정 팝업
 // ══════════════════════════════════════════
 function openEditItems() {
-  document.getElementById('editModalTitle').textContent = `📂 ${currentCat} — 품목 수정`;
+  // [수정 1 적용] 품목 수정 모달 제목에도 표시명 사용
+  document.getElementById('editModalTitle').textContent = `📂 ${getCatDisplayLabel(currentCat)} — 품목 수정`;
   document.getElementById('addItemInput').value = '';
   document.getElementById('addPosInput').value = '';
   renderEditList();
@@ -2840,7 +2760,6 @@ function renderEditList() {
       <input class="item-input" type="text" value="${name}" data-idx="${idx}">
       <button class="item-del" title="삭제" onclick="deleteItem(${idx})">✕</button>`;
 
-    // 드래그 이벤트
     li.addEventListener('dragstart', e => {
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', idx);
@@ -2862,7 +2781,6 @@ function renderEditList() {
       const fromIdx = parseInt(e.dataTransfer.getData('text/plain'));
       const toIdx = parseInt(li.dataset.idx);
       if (fromIdx === toIdx) return;
-      // 현재 편집 내용 먼저 수집
       collectCurrentEdits();
       const items = catData[currentCat];
       const moved = items.splice(fromIdx, 1)[0];
@@ -2875,7 +2793,6 @@ function renderEditList() {
   });
 }
 
-// 현재 입력값 즉시 catData에 반영
 function collectCurrentEdits() {
   const inputs = document.querySelectorAll('#editItemList .item-input');
   const items = catData[currentCat];
@@ -2884,7 +2801,6 @@ function collectCurrentEdits() {
     if (items[i] !== undefined) items[i] = inp.value.trim() || items[i];
   });
 }
-
 
 function deleteItem(idx) {
   collectCurrentEdits();
@@ -2905,14 +2821,13 @@ function addItem() {
     let pos = parseInt(posVal);
     if (isNaN(pos) || pos < 1) pos = 1;
     if (pos > items.length + 1) pos = items.length + 1;
-    items.splice(pos - 1, 0, val); // pos번째 앞에 삽입
+    items.splice(pos - 1, 0, val);
   } else {
     items.push(val);
   }
   inp.value = '';
   posInp.value = '';
   renderEditList();
-  // 추가된 항목으로 스크롤
   const ul = document.getElementById('editItemList');
   const targetIdx = posVal !== '' ? (parseInt(posVal)||1) - 1 : items.length - 1;
   const lis = ul.querySelectorAll('li');
@@ -2923,9 +2838,8 @@ document.getElementById('addItemInput').addEventListener('keydown', e => { if (e
 document.getElementById('addPosInput').addEventListener('keydown', e => { if (e.key==='Enter') addItem(); });
 
 async function saveItems() {
-  // 이름 변경 시 판매가도 함께 이전 (oldName → newName)
   const inputs = document.querySelectorAll('#editItemList .item-input');
-  const oldItems = (catData[currentCat] || []).slice(); // 수정 전 스냅샷
+  const oldItems = (catData[currentCat] || []).slice();
   inputs.forEach(inp => {
     const i = parseInt(inp.dataset.idx);
     const oldName = oldItems[i];
@@ -2938,11 +2852,9 @@ async function saveItems() {
     }
   });
   collectCurrentEdits();
-  // 빈 값 제거
   catData[currentCat] = (catData[currentCat]||[]).filter(v => v && v.trim());
   saveCatData();
   savePrices();
-  // catData와 prices만 독립 경로에 PUT (inputData 등 건드리지 않음)
   await Promise.all([
     _putPath('/data/catData', catData),
     _putPath('/data/prices',  Object.keys(PRICES).length ? PRICES : null),
@@ -2959,7 +2871,7 @@ async function saveItems() {
 // ══════════════════════════════════════════
 function openMemo(cat, name, key) {
   currentMemoKey = key;
-  document.getElementById('memoProductName').textContent = `${cat} > ${name}`;
+  document.getElementById('memoProductName').textContent = `${getCatDisplayLabel(cat)} > ${name}`;
   document.getElementById('memoText').value = memos[key]||'';
   openModal('memoOverlay');
 }
@@ -2990,7 +2902,7 @@ function openRecord() {
   records.forEach(r=>{
     html += `<tr>
       <td>${r.date||'-'}</td>
-      <td>${r.cat||'-'}</td><td>${r.items||0}개</td>
+      <td>${getCatDisplayLabel(r.cat||'-')}</td><td>${r.items||0}개</td>
       <td style="color:#1976D2;font-weight:bold;">${r.prod||0}</td>
       <td style="color:#388E3C;font-weight:bold;">${r.ship||0}</td>
     </tr>`;
@@ -3012,11 +2924,6 @@ async function clearAllRecords() {
 // ══════════════════════════════════════════
 // 설정 팝업
 // ══════════════════════════════════════════
-// openSettings → 위에서 재정의됨
-
-// ══════════════════════════════════════════
-// 클라우드 설정 UI 함수
-// ══════════════════════════════════════════
 function openSettings() {
   document.getElementById('settingAutoSave').checked = autoSave;
   const storedKey = localStorage.getItem('cloudApiKey') || '';
@@ -3031,7 +2938,6 @@ function openSettings() {
     st.textContent = '⚠️ 아직 설정되지 않음 (로컬 저장만 사용 중)';
     st.style.color = '#F57C00';
   }
-  // 비밀번호 변경 필드 초기화
   document.getElementById('pwCurrent').value = '';
   document.getElementById('pwNew').value = '';
   document.getElementById('pwChangeMsg').textContent = '';
@@ -3048,7 +2954,6 @@ function saveCloudSettings() {
   const bin = document.getElementById('inputBinId').value.trim();
   localStorage.setItem('cloudApiKey', key);
   localStorage.setItem('cloudBinId',  bin);
-  // 전역 변수도 갱신
   window.location.reload();
 }
 
@@ -3108,7 +3013,7 @@ async function resetSavedDays() {
 async function resetAllData() {
   if(!confirm('모든 데이터(입력값, 품목, 기록)를 초기화하시겠습니까?\n이 작업은 되돌릴 수 없습니다.')) return;
   catData       = defaultCatData();
-  catMeta       = defaultCatMeta();
+  catMeta       = {};
   inputData     = {};
   memos         = {};
   records       = [];
@@ -3118,7 +3023,6 @@ async function resetAllData() {
   qtyColors     = {};
   saveInputData(); saveMemos(); saveRecords(); saveSavedDays();
   savePrices(); saveProductColors(); saveQtyColors();
-  // 각 경로를 병렬로 초기화 — 전체 PATCH 없이 독립 PUT
   await Promise.all([
     _putPath('/data/catData',       catData),
     _putPath('/data/inputData',     null),
@@ -3138,7 +3042,6 @@ async function resetAllData() {
 }
 
 // ══════════════════════════════════════════
-// ══════════════════════════════════════════
 // 팝업 유틸
 // ══════════════════════════════════════════
 function openModal(id) { document.getElementById(id).classList.add('show'); }
@@ -3157,17 +3060,9 @@ function showToast(msg) {
   toastTimer = setTimeout(()=>t.classList.remove('show'), 2000);
 }
 
-// ══════════════════════════════════════════
-// 자동저장 토글
-// ══════════════════════════════════════════
 document.getElementById('autoSaveToggle').addEventListener('change', toggleAutoSave);
 
-// ══════════════════════════════════════════
-// scheduleCloudPush — 하위 호환용 (품목 저장 등 비셀 데이터)
-// 디바운스 제거 → 즉시 전송
-// ══════════════════════════════════════════
 function scheduleCloudPush() {
-  // 모든 데이터를 독립 경로에 즉시 PUT
   Promise.all([
     _putPath('/data/catData',       catData),
     _putPath('/data/inputData',     inputData),
@@ -3179,13 +3074,8 @@ function scheduleCloudPush() {
   ]);
 }
 
-// ══════════════════════════════════════════
-// 탭 닫힘 시 미저장 데이터 flush (beforeunload)
-// ══════════════════════════════════════════
 window.addEventListener('beforeunload', () => {
-  // SSE 연결 정리
   if (_sseSource) { _sseSource.close(); _sseSource = null; }
-  // 경로별 대기 큐에 남은 데이터가 있으면 sendBeacon으로 각각 flush
   const pendingPaths = Object.keys(_pathQueues);
   pendingPaths.forEach(path => {
     const val = _pathQueues[path];
@@ -3218,7 +3108,6 @@ updateReadOnlyBanner();
   const badge = document.getElementById('cloudBadge');
   if (badge) badge.innerHTML = '☁️ <span style="color:#1976D2;">연결 중...</span>';
 
-  // 1) 초기 전체 데이터 1회 로드
   const ok = await loadFromCloud();
   if (ok) {
     renderMainTable();
@@ -3229,7 +3118,6 @@ updateReadOnlyBanner();
     if (badge) badge.innerHTML = '☁️ <span style="color:#F57C00;">오프라인</span>';
   }
 
-  // 2) SSE 실시간 스트리밍 시작 (폴링 완전 제거)
   _startSSE();
 })();
 </script>
@@ -3239,7 +3127,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/fireba
 import { getDatabase, ref, push } 
 from "https://www.gstatic.com/firebasejs/12.12.1/firebase-database.js";
 
-// Firebase 설정
 const firebaseConfig = {
   apiKey: "AIzaSyACRdUgobb__urzDwfCCCIu4b_4_J4MAVA",
   authDomain: "production-log-27c8f.firebaseapp.com",
@@ -3250,14 +3137,11 @@ const firebaseConfig = {
   appId: "1:291853688608:web:86a1bfe4c6f8c89ebfc145"
 };
 
-// Firebase 초기화
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// 테스트 저장 함수
 function testSave() {
   console.log("버튼 클릭됨");
-
   push(ref(db, "test"), {
     msg: "동시접속 테스트",
     time: Date.now()
