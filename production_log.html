@@ -902,11 +902,6 @@ const CATS = [
   "갤러리아(빵,파이1)","갤러리아(빵,파이2)","갤러리아(케익)"
 ];
 
-// ══════════════════════════════════════════
-// [수정 1] 분류 화면 표시 이름 재정의
-// 내부 데이터 키("마카롱,다쿠아즈")는 절대 변경하지 않음
-// 화면에 표시되는 레이블만 "선물용 및 다대"로 변경
-// ══════════════════════════════════════════
 const CAT_DISPLAY_LABELS = {
   "마카롱,다쿠아즈": "선물용 및 다대"
 };
@@ -914,46 +909,30 @@ function getCatDisplayLabel(cat) {
   return CAT_DISPLAY_LABELS[cat] || cat;
 }
 
-// ══════════════════════════════════════════
-// [수정 2] 제품명 고정 색상 정의
-// "마카롱,다쿠아즈" / "쿠키,쨈" 분류의 특정 제품명에
-// 날짜·사용자 설정과 무관하게 항상 동일한 배경색 적용
-// ══════════════════════════════════════════
 const FIXED_PRODUCT_COLORS = {
-  // ── 마카롱,다쿠아즈 ──────────────────────
-  // 하늘색 (#D1ECF1)
   "우유모찌롤":   "#D1ECF1",
   "초코모찌롤":   "#D1ECF1",
   "말차모찌롤":   "#D1ECF1",
   "밀크스틱(공방)":         "#D1ECF1",
   "휘낭시에":     "#D1ECF1",
   "레몬시트롱":   "#D1ECF1",
-  // 핑크색 (#F8D7DA)
   "미니오렌지살구": "#F8D7DA",
-  // 연두색 (#D4EDDA)
   "미니살라망드":   "#D4EDDA",
-
-  // ── 쿠키,쨈 ──────────────────────────────
-  // 하늘색 (#D1ECF1)
   "곰돌이쿠키":   "#D1ECF1",
   "하트쿠키":     "#D1ECF1",
   "복샌드쿠키":   "#D1ECF1",
   "말쿠키":       "#D1ECF1",
   "샤브레":       "#D1ECF1",
   "초코샤브레":   "#D1ECF1",
-  // 핑크색 (#F8D7DA)
   "땅콩쿠키":     "#F8D7DA",
   "바통":         "#F8D7DA",
-  // 연두색 (#D4EDDA)
   "쉘":           "#D4EDDA",
   "뽀로":         "#D4EDDA",
 };
-// 고정 색상을 적용할 분류 집합
 const FIXED_COLOR_CATS = new Set(["마카롱,다쿠아즈", "쿠키,쨈"]);
 
 const COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
 
-// 분류별 컬럼 반환 (일부 분류는 별도 지점 구성)
 function colsForCat(cat) {
   if (cat === "도안(케익)") {
     return ["도안점","둔산점","갤러리아점","유성점","건양대점","둔곡점","포장실"];
@@ -964,7 +943,6 @@ function colsForCat(cat) {
   return COLS;
 }
 
-// ── 판매가 (제품명 → 원) ──
 let PRICES = {};
 function loadPrices()  {
   try {
@@ -981,7 +959,6 @@ function loadPrices()  {
 function savePrices()  { try { localStorage.setItem('priceData', JSON.stringify(PRICES)); } catch(e){} }
 loadPrices();
 
-// 분류별 품목 (로컬스토리지에서 불러오거나 기본값)
 function defaultCatData() {
   return {
     "도안(빵,파이1)": ["크랜베리롤치즈캄파뉴","콘치즈캄파뉴","감자치아바타","올리브치아","넛츠스틱","모닝빵","파이만주","마늘홀릭","뽀드득소세지","야채소세지빵","명장팥빵","소금빵","스트링치즈소금빵","커피번","에그타르트","모카빵","소보로빵","팥고구마식빵","에그소금빵","무화과치아바타","바질토마토","명란소금빵","올리브베이글","블루베리베이글","명란파빵","양파빵","쌀캄파뉴","무가당빵(팥)","무가당빵(듀럼)","무가당빵(코코넛)","올리브맛도리","피자부어스트","초코바게트","모짜파니니","찹쌀떡 품은 소금빵"],
@@ -1114,9 +1091,15 @@ function cloudPushColor(type, key, val) {
   return _putPath(path, val || null);
 }
 
+// ══════════════════════════════════════════
+// [수정] cloudPushMemo — 날짜별 경로로 저장
+// 경로: /data/memos/{dateKey}/{memoKey}
+// 이렇게 하면 날짜가 다르면 서로 다른 위치에 저장됨
+// ══════════════════════════════════════════
 function cloudPushMemo(key, val) {
   const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
-  const path = `/data/memos/${esc(key)}`;
+  const dateKey = getCurrentDateKey();
+  const path = `/data/memos/${esc(dateKey)}/${esc(key)}`;
   return _putPath(path, val || null);
 }
 
@@ -1156,6 +1139,7 @@ function _applyRemoteData(data) {
     }
   }
 
+  // memos는 날짜별 중첩 구조이므로 동일하게 병합
   if (data.memos && JSON.stringify(data.memos) !== JSON.stringify(memos)) {
     memos = data.memos; saveMemos(); changed = true;
   }
@@ -1301,6 +1285,33 @@ function saveRecords()   { try{localStorage.setItem('records',JSON.stringify(rec
 function loadSavedDays() { try{ const s=localStorage.getItem('savedDays'); return s?parseInt(s,10):0; }catch(e){return 0;} }
 function saveSavedDays() { try{localStorage.setItem('savedDays',String(savedDays));}catch(e){} }
 
+// ══════════════════════════════════════════
+// [핵심 수정] 날짜별 메모 헬퍼 함수
+// ──────────────────────────────────────────
+// memos 구조: { "YYYY-MM-DD": { "cat__name": "메모내용" } }
+//
+// ▸ 날짜가 바뀌면 다른 dateKey를 사용하므로
+//   자동으로 이전 날짜 메모와 분리됩니다.
+// ▸ 이전 날짜 메모는 해당 날짜 키 아래 보존되어
+//   과거 날짜로 이동하면 그대로 조회됩니다.
+// ══════════════════════════════════════════
+function _getMemoForDate(dateKey) {
+  return (memos[dateKey] && typeof memos[dateKey] === 'object') ? memos[dateKey] : {};
+}
+function getMemo(key) {
+  const d = getCurrentDateKey();
+  return _getMemoForDate(d)[key] || '';
+}
+function setMemo(key, val) {
+  const d = getCurrentDateKey();
+  if (!memos[d] || typeof memos[d] !== 'object') memos[d] = {};
+  if (val) memos[d][key] = val;
+  else delete memos[d][key];
+}
+function hasMemoForKey(key) {
+  return !!getMemo(key);
+}
+
 async function saveAll() {
   saveCatData(); saveInputData(); saveMemos(); saveRecords();
   savePrices(); saveSavedDays(); saveProductColors(); saveQtyColors();
@@ -1404,7 +1415,6 @@ function renderCatGrid() {
   CATS.forEach(cat => {
     const cell = document.createElement('div');
     cell.className = 'cat-cell' + (cat===currentCat?' active':'');
-    // [수정 1 적용] 화면 표시는 getCatDisplayLabel() 사용, 내부 키(cat)는 그대로 유지
     cell.innerHTML = `${getCatDisplayLabel(cat)}`;
     cell.addEventListener('click', ()=>selectCat(cat));
     grid.appendChild(cell);
@@ -1419,7 +1429,6 @@ function selectCat(cat) {
 }
 
 function updateCurrentBar() {
-  // [수정 1 적용] 현재 분류 바에도 표시명 사용
   document.getElementById('currentCatLabel').textContent = getCatDisplayLabel(currentCat);
   document.getElementById('currentCatCount').textContent = '';
 }
@@ -1468,7 +1477,8 @@ function renderMainTable() {
     const tr = document.createElement('tr');
     tr.className = 'data-row';
     const memoKey = currentCat+'__'+name;
-    const hasMemo = memos[memoKey] ? '💬' : '';
+    // [수정] 날짜별 메모 헬퍼 사용 — 현재 날짜에 메모가 있을 때만 💬 표시
+    const hasMemo = hasMemoForKey(memoKey) ? '💬' : '';
 
     let cells = `<td style="color:#aaa;font-size:10px;width:28px;">${String(i+1).padStart(2,'0')}</td>`;
     const productColorKey = `${currentCat}__${name}`;
@@ -1476,11 +1486,6 @@ function renderMainTable() {
     const _pColors = getProductColorsForDate(dateKey);
     const _qColors = getQtyColorsForDate(dateKey);
 
-    // ══════════════════════════════════════
-    // [수정 2 적용] 제품명 셀 배경색 결정 로직
-    // 우선순위: 고정색상 > 사용자 설정 색상
-    // 고정색상 대상: FIXED_COLOR_CATS에 속하는 분류의 FIXED_PRODUCT_COLORS에 등록된 제품명
-    // ══════════════════════════════════════
     const _fixedColor = FIXED_COLOR_CATS.has(currentCat)
       ? (FIXED_PRODUCT_COLORS[name] || '')
       : '';
@@ -1643,7 +1648,6 @@ function selectColor(swatchEl) {
   const dateKey = getCurrentDateKey();
 
   if (_selectedProductEl) {
-    // 고정 색상 분류의 고정 색상 제품은 사용자 색상 변경 불가 안내
     const productKey = _selectedProductEl.dataset.productKey || '';
     const productName = productKey.split('__')[1] || '';
     if (FIXED_COLOR_CATS.has(currentCat) && FIXED_PRODUCT_COLORS[productName]) {
@@ -2195,7 +2199,6 @@ function renderSettlement(store) {
     }
 
     grandQty += catQty; grandAmt += catAmt;
-    // [수정 1 적용] 결산 내 분류명도 표시명 사용
     html += `
     <div class="sett-group">
       <div class="sett-group-title">
@@ -2257,7 +2260,6 @@ function openAccum() {
   CATS.forEach(c => {
     const op = document.createElement('option');
     op.value = c;
-    // [수정 1 적용] 누적 집계 분류 필터에도 표시명 사용
     op.textContent = getCatDisplayLabel(c);
     cf.appendChild(op);
   });
@@ -2393,7 +2395,6 @@ function renderAccum() {
     storeCols.forEach(col => { grandStore[col] += catStore[col]; });
     grandTotal += catTotal;
 
-    // [수정 1 적용] 누적 집계 분류 헤더에도 표시명 사용
     html += `
     <div class="accum-cat-header">📂 ${getCatDisplayLabel(cat)} &nbsp;<span style="font-size:11px;font-weight:normal;color:#555;">총 ${catTotal.toLocaleString()}개</span></div>
     <table class="accum-table">
@@ -2676,7 +2677,6 @@ function confirmReset() {
   _doConfirmReset();
 }
 function _doConfirmReset() {
-  // [수정 1 적용] 초기화 확인 팝업에도 표시명 사용
   document.getElementById('resetCatName').textContent = getCatDisplayLabel(currentCat);
   openModal('resetOverlay');
 }
@@ -2715,7 +2715,8 @@ function exportCSV() {
     (catData[cat]||[]).forEach(name=>{
       const vals = allCols.map(col => catCols.includes(col) ? getInput(cat,name,col) : '');
       const memoKey = cat + '__' + name;
-      const memo = memos[memoKey] || '';
+      // [수정] 날짜별 메모 헬퍼 사용
+      const memo = getMemo(memoKey);
       csv += `${csvCell(date)},${csvCell(cat)},${csvCell(name)},${vals.join(',')},${csvCell(memo)}\n`;
     });
   });
@@ -2734,7 +2735,6 @@ function exportCSV() {
 // 목록·항목 수정 팝업
 // ══════════════════════════════════════════
 function openEditItems() {
-  // [수정 1 적용] 품목 수정 모달 제목에도 표시명 사용
   document.getElementById('editModalTitle').textContent = `📂 ${getCatDisplayLabel(currentCat)} — 품목 수정`;
   document.getElementById('addItemInput').value = '';
   document.getElementById('addPosInput').value = '';
@@ -2872,14 +2872,15 @@ async function saveItems() {
 function openMemo(cat, name, key) {
   currentMemoKey = key;
   document.getElementById('memoProductName').textContent = `${getCatDisplayLabel(cat)} > ${name}`;
-  document.getElementById('memoText').value = memos[key]||'';
+  // [수정] 현재 날짜의 메모만 불러옴 — 다른 날짜 메모는 표시되지 않음
+  document.getElementById('memoText').value = getMemo(key);
   openModal('memoOverlay');
 }
 
 function saveMemo() {
   const val = document.getElementById('memoText').value.trim();
-  if(val) memos[currentMemoKey]=val;
-  else delete memos[currentMemoKey];
+  // [수정] 날짜별 setMemo 헬퍼 사용
+  setMemo(currentMemoKey, val);
   saveMemos();
   cloudPushMemo(currentMemoKey, val || null);
   closeModal('memoOverlay');
