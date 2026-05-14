@@ -141,7 +141,6 @@ select { border:1px solid #ccc; border-radius:4px; padding:4px 6px; font-size:11
 input:checked + .slider { background:#1976D2; }
 input:checked + .slider:before { transform:translateX(18px); }
 
-
 /* btn variants */
 .btn-save   { background:#388E3C; color:#fff; border:none; border-radius:4px; padding:5px 14px; cursor:pointer; font-size:11px; font-family:inherit; }
 .btn-save:hover { background:#2E7D32; }
@@ -1091,11 +1090,6 @@ function cloudPushColor(type, key, val) {
   return _putPath(path, val || null);
 }
 
-// ══════════════════════════════════════════
-// [수정] cloudPushMemo — 날짜별 경로로 저장
-// 경로: /data/memos/{dateKey}/{memoKey}
-// 이렇게 하면 날짜가 다르면 서로 다른 위치에 저장됨
-// ══════════════════════════════════════════
 function cloudPushMemo(key, val) {
   const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
   const dateKey = getCurrentDateKey();
@@ -1139,7 +1133,6 @@ function _applyRemoteData(data) {
     }
   }
 
-  // memos는 날짜별 중첩 구조이므로 동일하게 병합
   if (data.memos && JSON.stringify(data.memos) !== JSON.stringify(memos)) {
     memos = data.memos; saveMemos(); changed = true;
   }
@@ -1285,16 +1278,6 @@ function saveRecords()   { try{localStorage.setItem('records',JSON.stringify(rec
 function loadSavedDays() { try{ const s=localStorage.getItem('savedDays'); return s?parseInt(s,10):0; }catch(e){return 0;} }
 function saveSavedDays() { try{localStorage.setItem('savedDays',String(savedDays));}catch(e){} }
 
-// ══════════════════════════════════════════
-// [핵심 수정] 날짜별 메모 헬퍼 함수
-// ──────────────────────────────────────────
-// memos 구조: { "YYYY-MM-DD": { "cat__name": "메모내용" } }
-//
-// ▸ 날짜가 바뀌면 다른 dateKey를 사용하므로
-//   자동으로 이전 날짜 메모와 분리됩니다.
-// ▸ 이전 날짜 메모는 해당 날짜 키 아래 보존되어
-//   과거 날짜로 이동하면 그대로 조회됩니다.
-// ══════════════════════════════════════════
 function _getMemoForDate(dateKey) {
   return (memos[dateKey] && typeof memos[dateKey] === 'object') ? memos[dateKey] : {};
 }
@@ -1477,7 +1460,6 @@ function renderMainTable() {
     const tr = document.createElement('tr');
     tr.className = 'data-row';
     const memoKey = currentCat+'__'+name;
-    // [수정] 날짜별 메모 헬퍼 사용 — 현재 날짜에 메모가 있을 때만 💬 표시
     const hasMemo = hasMemoForKey(memoKey) ? '💬' : '';
 
     let cells = `<td style="color:#aaa;font-size:10px;width:28px;">${String(i+1).padStart(2,'0')}</td>`;
@@ -1515,8 +1497,9 @@ function renderMainTable() {
       const savedBg = _qColors[colorKey] || '';
       const inlineStyle = savedBg ? `background:${savedBg};` : (ci===lastColIdx ? 'background:#FFF8F8;' : '');
       const roAttr = isDateReadOnly() ? 'readonly disabled style="' + inlineStyle + 'opacity:0.7;cursor:not-allowed;"' : 'style="' + inlineStyle + '"';
+      // ★ 수정: value가 0이면 빈칸으로 표시 (기존: value="${v}")
       cells += `<td style="${bg}padding:3px 2px;">
-        <input class="qty-box${savedBg?' color-selected':''}" type="number" min="0" value="${v}"
+        <input class="qty-box${savedBg?' color-selected':''}" type="number" min="0" value="${v > 0 ? v : ''}"
           data-cat="${currentCat}" data-name="${name}" data-col="${col}"
           data-color-key="${colorKey}"
           ${roAttr}
@@ -2494,8 +2477,9 @@ function _renderMacaronDetailTable(items) {
 function _appendMacaronRow(tbody, item, idx) {
   const tr = document.createElement('tr');
   tr.className = 'data-row';
+  // ★ 수정: value가 0(falsy)이면 빈칸으로 표시 (기존: value="${item[col]||0}")
   const colInputs = MACARON_DETAIL_COLS.map(col =>
-    `<td style="padding:3px 2px;"><input class="qty-box" type="number" min="0" value="${item[col]||0}" data-col="${col}" style="width:46px;"></td>`
+    `<td style="padding:3px 2px;"><input class="qty-box" type="number" min="0" value="${item[col]||''}" data-col="${col}" style="width:46px;"></td>`
   ).join('');
   tr.innerHTML = `
     <td style="color:#aaa;font-size:10px;width:26px;text-align:center;">${String(idx+1).padStart(2,'0')}</td>
@@ -2715,7 +2699,6 @@ function exportCSV() {
     (catData[cat]||[]).forEach(name=>{
       const vals = allCols.map(col => catCols.includes(col) ? getInput(cat,name,col) : '');
       const memoKey = cat + '__' + name;
-      // [수정] 날짜별 메모 헬퍼 사용
       const memo = getMemo(memoKey);
       csv += `${csvCell(date)},${csvCell(cat)},${csvCell(name)},${vals.join(',')},${csvCell(memo)}\n`;
     });
@@ -2872,14 +2855,12 @@ async function saveItems() {
 function openMemo(cat, name, key) {
   currentMemoKey = key;
   document.getElementById('memoProductName').textContent = `${getCatDisplayLabel(cat)} > ${name}`;
-  // [수정] 현재 날짜의 메모만 불러옴 — 다른 날짜 메모는 표시되지 않음
   document.getElementById('memoText').value = getMemo(key);
   openModal('memoOverlay');
 }
 
 function saveMemo() {
   const val = document.getElementById('memoText').value.trim();
-  // [수정] 날짜별 setMemo 헬퍼 사용
   setMemo(currentMemoKey, val);
   saveMemos();
   cloudPushMemo(currentMemoKey, val || null);
