@@ -253,35 +253,23 @@ input:checked + .slider:before { transform:translateX(18px); }
    모바일 반응형 (768px 이하)
 ══════════════════════════════════════════ */
 @media (max-width: 768px) {
-
-  /* ── 기준 ── */
   body { font-size:12px; }
-
-  /* 헤더 */
   .header { padding:6px 10px; flex-wrap:wrap; gap:5px; }
   .header-title { font-size:12px; }
   .header-sub { font-size:10px; }
   #cloudBadge { font-size:10px; margin-right:0; }
   .header-right { gap:4px; flex-wrap:wrap; }
   .btn { padding:0 9px; font-size:11px; gap:2px; height:30px; line-height:30px; display:inline-flex; align-items:center; }
-
-  /* 요약 카드 — 2×2 */
   .summary-section { padding:8px 10px; }
   .summary-cards { grid-template-columns:repeat(2,1fr); gap:6px; }
   .summary-card { padding:7px 10px; }
   .summary-card-label { font-size:10px; margin-bottom:2px; }
   .summary-card-value { font-size:18px; }
-
-  /* 날짜·자동저장 */
   .controls { flex-direction:column; align-items:flex-start; gap:6px; padding:7px 10px; }
   .date-area { gap:5px; }
   .date-input { font-size:11px; padding:0 8px; height:30px; border-radius:4px; }
   select { font-size:11px; padding:0 6px; height:30px; }
-
-  /* 공지 */
   .notice-banner { margin:6px 10px; padding:6px 10px; font-size:11px; }
-
-  /* 분류 그리드 — 3열 */
   .cat-section { margin:6px 10px 8px; }
   .cat-label { font-size:10px; margin-bottom:5px; }
   .cat-grid { grid-template-columns:repeat(3,1fr); }
@@ -290,48 +278,20 @@ input:checked + .slider:before { transform:translateX(18px); }
   .cat-cell:nth-child(3n)   { border-right:none; }
   .cat-cell:nth-child(n+7)  { border-bottom:1px solid #ccc; }
   .cat-cell:nth-child(n+10) { border-bottom:none; }
-
-  /* 현재 분류 바 */
   .current-cat-bar { margin:0 10px 5px; padding:5px 10px; font-size:10px; }
   .current-cat-bar strong { font-size:11px; }
-
-  /* ── 테이블 영역 ── */
   .table-section { margin:0 10px 10px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
   .table-header { flex-direction:row; align-items:center; justify-content:space-between; gap:5px; padding:5px 0; flex-wrap:wrap; }
   .table-title { font-size:11px; font-weight:bold; white-space:nowrap; }
   .table-actions { display:flex; gap:3px; flex-wrap:wrap; }
-
-  /* 액션 버튼 — 모두 동일 크기 */
-  .btn-small {
-    padding:0 8px;
-    font-size:11px;
-    height:28px;
-    line-height:28px;
-    white-space:nowrap;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    border-radius:4px;
-  }
-
-  /* 테이블 헤더·셀 */
+  .btn-small { padding:0 8px; font-size:11px; height:28px; line-height:28px; white-space:nowrap; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; }
   .main-table { font-size:11px; }
   .main-table th { padding:7px 12px; font-size:11px; white-space:nowrap; }
   .main-table td { padding:5px 10px; }
-
-  /* 제품명 열 */
   .col-product { min-width:75px; max-width:100px; padding-left:8px!important; font-size:11px; }
-
-  /* 수량 입력 박스 — qty-box 통일 */
   .qty-box { width:52px; height:28px; font-size:12px; border-radius:4px; }
-
-  /* 판매가 */
   .price-input { width:68px; min-width:58px; font-size:11px; padding:0 6px; height:28px; }
-
-  /* 비고 버튼 — qty-box와 동일 높이 */
   .note-btn { height:28px; line-height:28px; font-size:11px; padding:0 8px; min-width:50px; border-radius:4px; }
-
-  /* ── 모바일 열 고정: 번호·제품명 sticky ── */
   .main-table { border-collapse:separate; border-spacing:0; }
   .main-table thead th:nth-child(1),
   .main-table thead th:nth-child(2) { position:sticky; z-index:3; background:#F5F5F5; }
@@ -343,33 +303,21 @@ input:checked + .slider:before { transform:translateX(18px); }
   .main-table tbody td:nth-child(2) { left:20px; min-width:75px; background:#fff; border-right:2px solid #bbb; }
   .main-table tr.data-row:hover td:nth-child(1),
   .main-table tr.data-row:hover td:nth-child(2) { background:#f0f6ff; }
-
-  /* 팝업 모달 */
   .modal { width:96vw!important; max-width:96vw!important; margin:0 auto; }
   .modal-header { padding:10px 12px 8px; }
   .modal-title { font-size:12px; }
   .modal-body { padding:10px 12px; }
   .modal-footer { padding:8px 12px; gap:5px; }
   .btn-save, .btn-cancel, .btn-danger { font-size:11px; padding:0 12px; height:30px; }
-
-  /* 결산 탭 */
   .sett-tab { padding:7px 9px; font-size:10px; }
-
-  /* 결산 기간 바 */
   .sett-period-bar { padding:7px 10px; gap:5px; }
   .sett-mode-btn { padding:0 9px; font-size:10px; height:28px; }
   .sett-date-range input[type=date] { font-size:10px; padding:0 5px; height:28px; }
   .sett-apply-btn { padding:0 9px; font-size:10px; height:28px; }
   .sett-period-info { font-size:9px; }
-
-  /* 분류 레이블 */
   .cat-label { font-size:10px; }
-
-  /* ── 수량 입력 열 간격 (JS 인라인 padding 재정의) ── */
   .main-table td[style*="padding:3px 2px"],
-  .main-table td[style*="padding: 3px 2px"] {
-    padding: 5px 10px !important;
-  }
+  .main-table td[style*="padding: 3px 2px"] { padding: 5px 10px !important; }
 }
 </style>
 </head>
@@ -409,7 +357,6 @@ input:checked + .slider:before { transform:translateX(18px); }
   <div class="date-area">
     <span style="font-size:12px;color:#555;">📅 날짜</span>
     <input type="date" class="date-input" id="dateInput" value="">
-
   </div>
   <div style="font-size:11px;color:#555;">자동저장: <strong id="autoSaveLabel" style="color:#1976D2;">활성</strong>
     &nbsp;<label class="toggle" style="vertical-align:middle;"><input type="checkbox" id="autoSaveToggle" checked onchange="toggleAutoSave()"><span class="slider"></span></label>
@@ -433,7 +380,6 @@ input:checked + .slider:before { transform:translateX(18px); }
 
 <!-- Table -->
 <div class="table-section">
-  <!-- 색상 선택 툴바 -->
   <div class="color-picker-bar" id="colorPickerBar" style="margin-bottom:8px;">
     <span class="color-picker-label">🎨 셀 색상:</span>
     <div class="color-swatch" style="background:#FFE0E0;" data-color="#FFE0E0" onclick="selectColor(this)" title="연한 빨강"></div>
@@ -478,9 +424,7 @@ input:checked + .slider:before { transform:translateX(18px); }
   </table>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     팝업 1: 목록·항목 수정
-════════════════════════════════════════════ -->
+<!-- 팝업 1: 목록·항목 수정 -->
 <div class="overlay" id="editOverlay" onclick="overlayClick(event,'editOverlay')">
   <div class="modal" style="width:440px;">
     <div class="modal-header">
@@ -511,9 +455,7 @@ input:checked + .slider:before { transform:translateX(18px); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     팝업 2: 초기화 확인
-════════════════════════════════════════════ -->
+<!-- 팝업 2: 초기화 확인 -->
 <div class="overlay" id="resetOverlay" onclick="overlayClick(event,'resetOverlay')">
   <div class="modal" style="width:360px;">
     <div class="modal-header">
@@ -534,9 +476,7 @@ input:checked + .slider:before { transform:translateX(18px); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     팝업 3: 메모 입력
-════════════════════════════════════════════ -->
+<!-- 팝업 3: 메모 입력 -->
 <div class="overlay" id="memoOverlay" onclick="overlayClick(event,'memoOverlay')">
   <div class="modal" style="width:380px;">
     <div class="modal-header">
@@ -553,9 +493,7 @@ input:checked + .slider:before { transform:translateX(18px); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     팝업 4: 기록
-════════════════════════════════════════════ -->
+<!-- 팝업 4: 기록 -->
 <div class="overlay" id="recordOverlay" onclick="overlayClick(event,'recordOverlay')">
   <div class="modal" style="width:640px;">
     <div class="modal-header">
@@ -570,9 +508,7 @@ input:checked + .slider:before { transform:translateX(18px); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     팝업 5: 설정
-════════════════════════════════════════════ -->
+<!-- 팝업 5: 설정 -->
 <div class="overlay" id="settingsOverlay" onclick="overlayClick(event,'settingsOverlay')">
   <div class="modal" style="width:400px;">
     <div class="modal-header">
@@ -630,8 +566,6 @@ input:checked + .slider:before { transform:translateX(18px); }
         <div><div class="setting-label">모든 데이터 초기화</div><div class="setting-desc">저장된 모든 기록과 품목을 삭제합니다</div></div>
         <button class="btn-danger" onclick="resetAllData()" style="font-size:11px;">전체 초기화</button>
       </div>
-
-      <!-- 관리자 비밀번호 변경 -->
       <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
         <div>
           <div class="setting-label">🔑 관리자 비밀번호 변경</div>
@@ -667,9 +601,7 @@ input:checked + .slider:before { transform:translateX(18px); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     팝업 6: 관리자 패널 (날짜별 잠금 해제/설정)
-════════════════════════════════════════════ -->
+<!-- 팝업 6: 관리자 패널 -->
 <div class="overlay" id="adminOverlay" onclick="overlayClick(event,'adminOverlay')">
   <div class="modal" style="width:420px;">
     <div class="modal-header">
@@ -680,7 +612,6 @@ input:checked + .slider:before { transform:translateX(18px); }
       <button class="modal-close" onclick="closeAdminPanel()">✕</button>
     </div>
     <div class="modal-body" id="adminModalBody" style="min-height:200px;">
-      <!-- 로그인 전 -->
       <div id="adminLoginArea" class="admin-login-area">
         <div style="font-size:12px;color:#555;margin-bottom:4px;">관리자 비밀번호를 입력하세요</div>
         <div class="admin-pw-row">
@@ -689,17 +620,14 @@ input:checked + .slider:before { transform:translateX(18px); }
         </div>
         <div id="adminLoginMsg" style="font-size:11px;color:#e53935;margin-top:6px;min-height:16px;"></div>
       </div>
-      <!-- 로그인 후 -->
       <div id="adminContent" style="display:none;">
         <div style="font-size:11px;color:#888;margin-bottom:10px;">
           🟢 관리자 모드 — 날짜를 선택해 잠금 해제/설정하세요
         </div>
-        <!-- 현재 잠금 해제된 날짜 목록 -->
         <div style="font-size:11px;font-weight:600;color:#444;margin-bottom:6px;">📋 잠금 해제된 날짜 목록</div>
         <ul class="unlock-list" id="unlockDateList">
           <li style="color:#bbb;font-size:11px;justify-content:center;padding:16px 0;">잠금 해제된 날짜가 없습니다</li>
         </ul>
-        <!-- 새 날짜 잠금 해제 -->
         <div class="admin-unlock-row">
           <input type="date" class="admin-date-pick" id="adminDatePick">
           <button class="btn-unlock" onclick="adminUnlockDate()">🔓 잠금 해제</button>
@@ -714,9 +642,7 @@ input:checked + .slider:before { transform:translateX(18px); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     팝업 8: 누적 집계
-════════════════════════════════════════════ -->
+<!-- 팝업 8: 누적 집계 -->
 <div class="overlay" id="accumOverlay" onclick="overlayClick(event,'accumOverlay')">
   <div class="modal" style="width:98vw;max-width:1200px;">
     <div class="modal-header">
@@ -727,12 +653,10 @@ input:checked + .slider:before { transform:translateX(18px); }
       <button class="modal-close" onclick="closeModal('accumOverlay')">✕</button>
     </div>
     <div class="modal-body" style="padding:0;max-height:82vh;overflow-y:auto;">
-      <!-- 기간 필터 바 -->
       <div style="padding:10px 16px;background:#F8F9FA;border-bottom:1px solid #e0e0e0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:10;">
         <span style="font-size:11px;color:#555;font-weight:600;white-space:nowrap;">📅 기간:</span>
         <button class="sett-mode-btn active" id="accumModeMonth" onclick="setAccumMode('month')">한 달 전체</button>
         <button class="sett-mode-btn" id="accumModeRange" onclick="setAccumMode('range')">기간 지정</button>
-        <!-- 한 달 전체 -->
         <div id="accumMonthArea" style="display:flex;align-items:center;gap:6px;">
           <select id="accumYearSel" onchange="applyAccumMonth()" style="border:1px solid #ccc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:inherit;background:#fff;outline:none;"></select>
           <select id="accumMonthSel" onchange="applyAccumMonth()" style="border:1px solid #ccc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:inherit;background:#fff;outline:none;">
@@ -742,7 +666,6 @@ input:checked + .slider:before { transform:translateX(18px); }
             <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
           </select>
         </div>
-        <!-- 기간 지정 -->
         <div id="accumRangeArea" style="display:none;align-items:center;gap:6px;">
           <input type="date" id="accumFromDate" style="border:1px solid #ccc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:inherit;outline:none;background:#fff;">
           <span style="font-size:11px;color:#888;">~</span>
@@ -750,13 +673,11 @@ input:checked + .slider:before { transform:translateX(18px); }
           <button class="sett-apply-btn" onclick="applyAccumRange()">조회</button>
         </div>
         <span class="sett-period-info" id="accumPeriodInfo"></span>
-        <!-- 분류 필터 -->
         <div style="margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <span style="font-size:11px;color:#555;font-weight:600;">📂 분류:</span>
           <select id="accumCatFilter" onchange="renderAccum()" style="border:1px solid #ccc;border-radius:4px;padding:4px 8px;font-size:11px;font-family:inherit;background:#fff;outline:none;max-width:180px;"></select>
         </div>
       </div>
-      <!-- 집계 테이블 -->
       <div id="accumContent" style="padding:16px;overflow-x:auto;"></div>
     </div>
     <div class="modal-footer">
@@ -769,9 +690,7 @@ input:checked + .slider:before { transform:translateX(18px); }
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- ═══════════════════════════════════════════
-     팝업 NEW-A: 결산 비밀번호 확인
-════════════════════════════════════════════ -->
+<!-- 팝업 NEW-A: 결산 비밀번호 확인 -->
 <div class="overlay" id="settlementAuthOverlay" onclick="overlayClick(event,'settlementAuthOverlay')">
   <div class="modal" style="width:360px;">
     <div class="modal-header">
@@ -796,9 +715,7 @@ input:checked + .slider:before { transform:translateX(18px); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     팝업 NEW-B: 마카롱/다쿠아즈 세부 입력
-════════════════════════════════════════════ -->
+<!-- 팝업 NEW-B: 마카롱/다쿠아즈 세부 입력 -->
 <div class="overlay" id="macaronDetailOverlay" onclick="overlayClick(event,'macaronDetailOverlay')">
   <div class="modal" style="width:min(98vw, 820px);">
     <div class="modal-header">
@@ -838,9 +755,7 @@ input:checked + .slider:before { transform:translateX(18px); }
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════
-     팝업 7: 결산
-════════════════════════════════════════════ -->
+<!-- 팝업 7: 결산 -->
 <div class="overlay" id="settlementOverlay" onclick="overlayClick(event,'settlementOverlay')">
   <div class="modal" style="width:860px;max-width:98vw;">
     <div class="modal-header">
@@ -851,18 +766,15 @@ input:checked + .slider:before { transform:translateX(18px); }
       <button class="modal-close" onclick="closeModal('settlementOverlay')">✕</button>
     </div>
     <div class="modal-body" style="padding:0;max-height:78vh;overflow-y:auto;">
-      <!-- 탭 -->
       <div style="display:flex;border-bottom:2px solid #e0e0e0;background:#fafafa;position:sticky;top:0;z-index:10;">
         <button class="sett-tab active" id="sttab-도안점"   onclick="selectSettTab('도안점')">🏪 도안점</button>
         <button class="sett-tab"        id="sttab-둔산점"   onclick="selectSettTab('둔산점')">🏪 둔산점</button>
         <button class="sett-tab"        id="sttab-갤러리아점" onclick="selectSettTab('갤러리아점')">🏪 갤러리아점</button>
       </div>
-      <!-- 기간 필터 바 -->
       <div class="sett-period-bar" style="position:sticky;top:43px;z-index:9;">
         <span class="sett-period-label">📅 기간:</span>
         <button class="sett-mode-btn active" id="settModeMonth" onclick="setSettMode('month')">한 달 전체</button>
         <button class="sett-mode-btn" id="settModeRange" onclick="setSettMode('range')">기간 지정</button>
-        <!-- 한 달 전체: 연도·월 선택 -->
         <div class="sett-date-range" id="settMonthArea" style="display:flex;">
           <select id="settYearSel" onchange="applySettMonth()" style="border:1px solid #ccc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:inherit;background:#fff;outline:none;"></select>
           <select id="settMonthSel" onchange="applySettMonth()" style="border:1px solid #ccc;border-radius:4px;padding:4px 7px;font-size:11px;font-family:inherit;background:#fff;outline:none;">
@@ -872,7 +784,6 @@ input:checked + .slider:before { transform:translateX(18px); }
             <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
           </select>
         </div>
-        <!-- 기간 지정 -->
         <div class="sett-date-range" id="settRangeArea" style="display:none;">
           <input type="date" id="settFromDate">
           <span class="sett-range-sep">~</span>
@@ -1110,16 +1021,28 @@ function _applyRemoteData(data) {
 
   if (data.catData && JSON.stringify(data.catData) !== JSON.stringify(catData)) {
     catData = data.catData; saveCatData();
-    renderCatGrid(); renderMainTable(); updateCurrentBar(); changed = true;
+    renderCatGrid(); updateCurrentBar(); changed = true;
+    // catData 변경 시에도 스크롤 보존 렌더
+    _renderWithScrollPreserve();
   }
 
   if (data.inputData) {
+    // ★ PATCH 3: 로컬에 있는 날짜는 리모트가 null/없어도 지우지 않음 (덮어쓰기 방지)
     const focused    = document.activeElement;
     const fCat       = focused && focused.dataset && focused.dataset.cat;
     const fName      = focused && focused.dataset && focused.dataset.name;
     const fCol       = focused && focused.dataset && focused.dataset.col;
     const dateKey    = getCurrentDateKey();
-    const merged     = JSON.parse(JSON.stringify(data.inputData));
+
+    const merged = JSON.parse(JSON.stringify(data.inputData));
+    // 로컬에 있는 날짜 키가 리모트에 없으면 로컬 값 보존
+    Object.keys(inputData).forEach(d => {
+      if (!merged[d] && inputData[d] && Object.keys(inputData[d]).length > 0) {
+        merged[d] = JSON.parse(JSON.stringify(inputData[d]));
+      }
+    });
+
+    // 현재 입력 중인 셀은 로컬 값 우선 유지
     if (fCat && fName && fCol) {
       if (!merged[dateKey])              merged[dateKey] = {};
       if (!merged[dateKey][fCat])        merged[dateKey][fCat] = {};
@@ -1145,7 +1068,7 @@ function _applyRemoteData(data) {
   if (data.prices !== undefined) {
     const np = data.prices || {};
     if (JSON.stringify(np) !== JSON.stringify(PRICES)) {
-      PRICES = np; savePrices(); renderMainTable(); changed = true;
+      PRICES = np; savePrices(); changed = true;
     }
   }
 
@@ -1176,7 +1099,9 @@ function _applyRemoteData(data) {
   }
 
   if (changed) {
-    renderMainTable(); updateSummary();
+    // ★ PATCH 2: 스크롤·포커스 유지 렌더
+    _renderWithScrollPreserve();
+    updateSummary();
     if (badge) badge.innerHTML = '☁️ <span style="color:#388E3C;">실시간 동기화 ✓</span>';
     showToast('🔄 실시간 반영됨');
   }
@@ -1390,6 +1315,53 @@ let currentMemoKey = '';
 let autoSave = true;
 
 // ══════════════════════════════════════════
+// ★ PATCH 1: 날짜 기준 유효 제품 목록 반환 헬퍼
+// 삭제된 제품도 해당 날짜 이전(deletedFrom > dateKey)이면 목록에 포함
+// ══════════════════════════════════════════
+function getEffectiveItems(cat, dateKey) {
+  const current = (catData[cat] || []).slice();
+  const deleted = (catData._deletedItems && catData._deletedItems[cat]) || [];
+  // deletedFrom이 dateKey보다 크면 → 해당 날짜엔 아직 있던 제품
+  const extra = deleted.filter(d =>
+    d.deletedFrom > dateKey && !current.includes(d.name)
+  );
+  if (!extra.length) return current;
+  return [...current, ...extra.map(d => d.name)];
+}
+
+// ★ PATCH 2: 스크롤·포커스 유지 렌더 헬퍼
+function _renderWithScrollPreserve() {
+  const scrollX = window.scrollX, scrollY = window.scrollY;
+  const focused = document.activeElement;
+  let focusKey = null;
+  if (focused && focused.classList && focused.classList.contains('qty-box')) {
+    focusKey = {
+      cat: focused.dataset.cat,
+      name: focused.dataset.name,
+      col: focused.dataset.col,
+      selStart: focused.selectionStart,
+      selEnd: focused.selectionEnd,
+    };
+  }
+  renderMainTable();
+  // requestAnimationFrame으로 DOM 업데이트 후 복원
+  requestAnimationFrame(() => {
+    window.scrollTo(scrollX, scrollY);
+    if (focusKey) {
+      const esc = s => (s || '').replace(/"/g, '\\"');
+      const sel = `input.qty-box[data-cat="${esc(focusKey.cat)}"][data-name="${esc(focusKey.name)}"][data-col="${esc(focusKey.col)}"]`;
+      try {
+        const el = document.querySelector(sel);
+        if (el) {
+          el.focus();
+          try { el.setSelectionRange(focusKey.selStart, focusKey.selEnd); } catch(e){}
+        }
+      } catch(e) {}
+    }
+  });
+}
+
+// ══════════════════════════════════════════
 // 렌더
 // ══════════════════════════════════════════
 function renderCatGrid() {
@@ -1436,7 +1408,8 @@ function setInput(cat, name, col, val) {
 function renderMainTable() {
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
-  const items = catData[currentCat] || [];
+  // ★ PATCH 1: 날짜 기준 유효 제품 목록 사용
+  const items = getEffectiveItems(currentCat, getCurrentDateKey());
   const curCols = colsForCat(currentCat);
   const lastColIdx = curCols.length - 1;
 
@@ -1497,7 +1470,6 @@ function renderMainTable() {
       const savedBg = _qColors[colorKey] || '';
       const inlineStyle = savedBg ? `background:${savedBg};` : (ci===lastColIdx ? 'background:#FFF8F8;' : '');
       const roAttr = isDateReadOnly() ? 'readonly disabled style="' + inlineStyle + 'opacity:0.7;cursor:not-allowed;"' : 'style="' + inlineStyle + '"';
-      // ★ 수정: value가 0이면 빈칸으로 표시 (기존: value="${v}")
       cells += `<td style="${bg}padding:3px 2px;">
         <input class="qty-box${savedBg?' color-selected':''}" type="number" min="0" value="${v > 0 ? v : ''}"
           data-cat="${currentCat}" data-name="${name}" data-col="${col}"
@@ -1712,7 +1684,8 @@ function clearColor() {
 
 function updateSummary() {
   let filled=0, totalProd=0, ship=0;
-  const curItems = catData[currentCat]||[];
+  const dateKey = getCurrentDateKey();
+  const curItems = getEffectiveItems(currentCat, dateKey);
   curItems.forEach(name=>{
     colsForCat(currentCat).forEach((col)=>{
       const v=getInput(currentCat,name,col);
@@ -1720,7 +1693,7 @@ function updateSummary() {
     });
   });
   CATS.forEach(cat=>{
-    const items = catData[cat]||[];
+    const items = getEffectiveItems(cat, dateKey);
     items.forEach(name=>{
       colsForCat(cat).forEach((col)=>{
         const v=getInput(cat,name,col);
@@ -2124,7 +2097,7 @@ function renderSettlement(store) {
   const dateKeys = _settDateKeys().sort();
 
   cats.forEach(cat => {
-    const items = catData[cat] || [];
+    // ★ PATCH 1: 날짜별 유효 제품 목록 사용
     const catCols = colsForCat(cat);
     let catQty = 0, catAmt = 0, dateBlocks = '';
 
@@ -2132,8 +2105,10 @@ function renderSettlement(store) {
       dateBlocks = `<div style="text-align:center;color:#bbb;padding:16px;font-size:11px;">출고 수량 없음</div>`;
     } else {
       dateKeys.forEach(d => {
+        // 해당 날짜 기준 유효 제품 목록
+        const dItems = getEffectiveItems(cat, d);
         let rowNum = 1, rows = '';
-        items.forEach(name => {
+        dItems.forEach(name => {
           const dQty = catCols.reduce((sum, c) => {
             const v = (inputData[d]&&inputData[d][cat]&&inputData[d][cat][name]) ? (inputData[d][cat][name][c]||0) : 0;
             return sum + v;
@@ -2340,16 +2315,17 @@ function renderAccum() {
   }
 
   targetCats.forEach(cat => {
-    const items = catData[cat] || [];
-    if (!items.length) return;
+    // ★ PATCH 1: 기간 내 가장 이른 날짜 기준으로 유효 제품 목록 산출
+    const earliestDate = dateKeys.length ? dateKeys[0] : _accumFromDate;
+    const accumItems = getEffectiveItems(cat, earliestDate);
+    if (!accumItems.length) return;
 
     const catStore = Object.fromEntries(storeCols.map(c => [c, 0]));
     let catTotal = 0;
-
     let rowsHtml = '';
     let rowIdx = 1;
 
-    items.forEach(name => {
+    accumItems.forEach(name => {
       const storeVals = storeCols.map(col => getAccumVal(cat, name, col));
       const rowTotal  = storeVals.reduce((s, v) => s + v, 0);
       if (rowTotal === 0) return;
@@ -2477,7 +2453,6 @@ function _renderMacaronDetailTable(items) {
 function _appendMacaronRow(tbody, item, idx) {
   const tr = document.createElement('tr');
   tr.className = 'data-row';
-  // ★ 수정: value가 0(falsy)이면 빈칸으로 표시 (기존: value="${item[col]||0}")
   const colInputs = MACARON_DETAIL_COLS.map(col =>
     `<td style="padding:3px 2px;"><input class="qty-box" type="number" min="0" value="${item[col]||''}" data-col="${col}" style="width:46px;"></td>`
   ).join('');
@@ -2512,9 +2487,7 @@ function saveMacaronDetail() {
   rows.forEach(tr => {
     const nameEl = tr.querySelector('[data-field="name"]');
     if (!nameEl || !nameEl.value.trim()) return;
-    const item = {
-      name: nameEl.value.trim()
-    };
+    const item = { name: nameEl.value.trim() };
     MACARON_DETAIL_COLS.forEach(col => {
       const inp = tr.querySelector(`[data-col="${col}"]`);
       item[col] = parseInt(inp && inp.value) || 0;
@@ -2552,7 +2525,6 @@ function exportMacaronDetailExcel() {
   const cols = MACARON_DETAIL_COLS;
 
   let csv = `제품명,${cols.join(',')},합계\n`;
-
   items.forEach(item => {
     const vals = cols.map(c => item[c] || 0);
     const total = vals.reduce((s, v) => s + v, 0);
@@ -2578,10 +2550,13 @@ function exportAccumCSV() {
   const periodSuffix = _accumMode === 'month'
     ? _accumFromDate.substring(0, 7)
     : `${_accumFromDate}_${_accumToDate}`;
+  const dateKeys = _accumDateKeys();
+  const earliestDate = dateKeys.length ? dateKeys[0] : _accumFromDate;
 
   let csv = `분류,제품명,${storeCols.join(',')},합계\n`;
   targetCats.forEach(cat => {
-    (catData[cat] || []).forEach(name => {
+    // ★ PATCH 1: 날짜 기준 유효 제품 목록
+    getEffectiveItems(cat, earliestDate).forEach(name => {
       const vals = storeCols.map(col => getAccumVal(cat, name, col));
       const total = vals.reduce((s, v) => s + v, 0);
       if (total === 0) return;
@@ -2603,14 +2578,20 @@ function exportSettlementCSV() {
   const periodSuffix = _settMode === 'month'
     ? _settFromDate.substring(0,7)
     : `${_settFromDate}_${_settToDate}`;
-  let csv = '분류,제품명,판매가,출고합계,금액\n';
+  const dateKeys = _settDateKeys().sort();
+  let csv = '분류,날짜,제품명,판매가,출고합계,금액\n';
   cats.forEach(cat => {
     const catCols = colsForCat(cat);
-    (catData[cat]||[]).forEach(name => {
-      const qty = catCols.reduce((sum, c) => sum + (getInputRange(cat, name, c) || 0), 0);
-      if (qty <= 0) return;
-      const price = PRICES[name] || 0;
-      csv += `${cat},${name},${price},${qty},${qty*price}\n`;
+    dateKeys.forEach(d => {
+      // ★ PATCH 1: 날짜 기준 유효 제품 목록
+      getEffectiveItems(cat, d).forEach(name => {
+        const qty = catCols.reduce((sum, c) => {
+          return sum + ((inputData[d]&&inputData[d][cat]&&inputData[d][cat][name]) ? (inputData[d][cat][name][c]||0) : 0);
+        }, 0);
+        if (qty <= 0) return;
+        const price = PRICES[name] || 0;
+        csv += `${cat},${d},${name},${price},${qty},${qty*price}\n`;
+      });
     });
   });
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
@@ -2634,7 +2615,7 @@ async function _doSaveData() {
   saveCatData();
 
   const date = document.getElementById('dateInput').value;
-  const items = catData[currentCat]||[];
+  const items = getEffectiveItems(currentCat, date);
   let ship = 0;
   items.forEach(name => { colsForCat(currentCat).forEach(col => { ship += getInput(currentCat, name, col); }); });
 
@@ -2653,6 +2634,7 @@ async function _doSaveData() {
   const synced = syncedMain && syncedRec && syncedDays;
   showToast(synced ? '💾 저장 + ☁️ 동기화 완료!' : '💾 저장 완료');
 }
+
 function confirmReset() {
   if (isDateReadOnly()) {
     checkAdminAndEdit(() => { _doConfirmReset(); });
@@ -2666,7 +2648,7 @@ function _doConfirmReset() {
 }
 async function doReset() {
   const dateKey = getCurrentDateKey();
-  const items = catData[currentCat]||[];
+  const items = getEffectiveItems(currentCat, dateKey);
   items.forEach(name => { colsForCat(currentCat).forEach(col => setInput(currentCat, name, col, 0)); });
   saveInputData();
   const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
@@ -2696,7 +2678,8 @@ function exportCSV() {
 
   CATS.forEach(cat=>{
     const catCols = colsForCat(cat);
-    (catData[cat]||[]).forEach(name=>{
+    // ★ PATCH 1: 날짜 기준 유효 제품 목록
+    getEffectiveItems(cat, date).forEach(name=>{
       const vals = allCols.map(col => catCols.includes(col) ? getInput(cat,name,col) : '');
       const memoKey = cat + '__' + name;
       const memo = getMemo(memoKey);
@@ -2820,9 +2803,12 @@ function addItem() {
 document.getElementById('addItemInput').addEventListener('keydown', e => { if (e.key==='Enter') addItem(); });
 document.getElementById('addPosInput').addEventListener('keydown', e => { if (e.key==='Enter') addItem(); });
 
+// ★ PATCH 1: saveItems — 삭제된 제품을 _deletedItems에 날짜 기록
 async function saveItems() {
   const inputs = document.querySelectorAll('#editItemList .item-input');
   const oldItems = (catData[currentCat] || []).slice();
+
+  // 이름 변경 시 가격 키도 이전
   inputs.forEach(inp => {
     const i = parseInt(inp.dataset.idx);
     const oldName = oldItems[i];
@@ -2835,7 +2821,24 @@ async function saveItems() {
     }
   });
   collectCurrentEdits();
-  catData[currentCat] = (catData[currentCat]||[]).filter(v => v && v.trim());
+  const newItems = (catData[currentCat]||[]).filter(v => v && v.trim());
+
+  // 삭제된 제품을 _deletedItems에 날짜와 함께 기록 (과거 데이터 보존용)
+  const deletedNames = oldItems.filter(n => n && !newItems.includes(n));
+  if (deletedNames.length > 0) {
+    const deleteFromDate = getCurrentDateKey();
+    if (!catData._deletedItems) catData._deletedItems = {};
+    if (!catData._deletedItems[currentCat]) catData._deletedItems[currentCat] = [];
+    deletedNames.forEach(name => {
+      // 이미 기록된 항목이면 유지 (더 이른 날짜의 삭제 기록 보존)
+      const exists = catData._deletedItems[currentCat].find(d => d.name === name);
+      if (!exists) {
+        catData._deletedItems[currentCat].push({ name, deletedFrom: deleteFromDate });
+      }
+    });
+  }
+
+  catData[currentCat] = newItems;
   saveCatData();
   savePrices();
   await Promise.all([
@@ -3043,18 +3046,6 @@ function showToast(msg) {
 }
 
 document.getElementById('autoSaveToggle').addEventListener('change', toggleAutoSave);
-
-function scheduleCloudPush() {
-  Promise.all([
-    _putPath('/data/catData',       catData),
-    _putPath('/data/inputData',     inputData),
-    _putPath('/data/memos',         Object.keys(memos).length ? memos : null),
-    _putPath('/data/prices',        Object.keys(PRICES).length ? PRICES : null),
-    _putPath('/data/savedDays',     savedDays),
-    _putPath('/data/productColors', Object.keys(productColors).length ? productColors : null),
-    _putPath('/data/qtyColors',     Object.keys(qtyColors).length ? qtyColors : null),
-  ]);
-}
 
 window.addEventListener('beforeunload', () => {
   if (_sseSource) { _sseSource.close(); _sseSource = null; }
