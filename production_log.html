@@ -2603,6 +2603,28 @@ function exportSettlementCSV() {
 // ══════════════════════════════════════════
 // 저장
 // ══════════════════════════════════════════
+
+// 관리자 인증 후 잠긴 날짜 편집 허용 (★ 신규 추가 — 누락되어 있던 함수)
+// 저장/초기화 버튼이 "잠긴 날짜"에서 아무 반응 없이 실패하던 원인이었습니다.
+function checkAdminAndEdit(callback) {
+  if (_isAdminLoggedIn) { callback(); return; }
+  const pw = prompt('🔒 잠긴 날짜입니다. 수정하려면 관리자 비밀번호를 입력하세요:');
+  if (pw === null) return; // 취소
+  if (pw === ADMIN_PW) {
+    _isAdminLoggedIn = true;
+    const dateKey = getCurrentDateKey();
+    if (dateKey !== getTodayStr()) {
+      unlockedDates[dateKey] = true;
+      saveUnlockedDates();
+      cloudPushUnlockDate(dateKey, true);
+      updateReadOnlyBanner();
+    }
+    callback();
+  } else {
+    showToast('❌ 비밀번호가 올바르지 않습니다');
+  }
+}
+
 async function saveData() {
   if (isDateReadOnly()) {
     checkAdminAndEdit(async () => { await _doSaveData(); });
@@ -2611,28 +2633,34 @@ async function saveData() {
   await _doSaveData();
 }
 
+// ★ 수정: try/catch 추가 — 오류가 나도 조용히 묻히지 않고 토스트로 알려줍니다
 async function _doSaveData() {
-  saveCatData();
+  try {
+    saveCatData();
 
-  const date = document.getElementById('dateInput').value;
-  const items = getEffectiveItems(currentCat, date);
-  let ship = 0;
-  items.forEach(name => { colsForCat(currentCat).forEach(col => { ship += getInput(currentCat, name, col); }); });
+    const date = document.getElementById('dateInput').value;
+    const items = getEffectiveItems(currentCat, date);
+    let ship = 0;
+    items.forEach(name => { colsForCat(currentCat).forEach(col => { ship += getInput(currentCat, name, col); }); });
 
-  const rec = { date, cat: currentCat, items: items.length, prod: 0, ship, ts: Date.now() };
+    const rec = { date, cat: currentCat, items: items.length, prod: 0, ship, ts: Date.now() };
 
-  savedDays++;
-  saveSavedDays();
-  updateSummary();
+    savedDays++;
+    saveSavedDays();
+    updateSummary();
 
-  const [syncedMain, syncedRec, syncedDays] = await Promise.all([
-    saveAll(),
-    _safePushRecords(rec),
-    _putPath('/data/savedDays', savedDays),
-  ]);
+    const [syncedMain, syncedRec, syncedDays] = await Promise.all([
+      saveAll(),
+      _safePushRecords(rec),
+      _putPath('/data/savedDays', savedDays),
+    ]);
 
-  const synced = syncedMain && syncedRec && syncedDays;
-  showToast(synced ? '💾 저장 + ☁️ 동기화 완료!' : '💾 저장 완료');
+    const synced = syncedMain && syncedRec && syncedDays;
+    showToast(synced ? '💾 저장 + ☁️ 동기화 완료!' : '💾 저장 완료 (클라우드 동기화 지연됨)');
+  } catch (e) {
+    console.error('저장 중 오류:', e);
+    showToast('⚠️ 저장 실패: ' + (e && e.message ? e.message : '알 수 없는 오류'));
+  }
 }
 
 function confirmReset() {
@@ -2646,17 +2674,24 @@ function _doConfirmReset() {
   document.getElementById('resetCatName').textContent = getCatDisplayLabel(currentCat);
   openModal('resetOverlay');
 }
+
+// ★ 수정: try/catch 추가 — 오류가 나도 조용히 묻히지 않고 토스트로 알려줍니다
 async function doReset() {
-  const dateKey = getCurrentDateKey();
-  const items = getEffectiveItems(currentCat, dateKey);
-  items.forEach(name => { colsForCat(currentCat).forEach(col => setInput(currentCat, name, col, 0)); });
-  saveInputData();
-  const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
-  await _putPath(`/data/inputData/${esc(dateKey)}/${esc(currentCat)}`, null);
-  closeModal('resetOverlay');
-  renderMainTable();
-  updateSummary();
-  showToast('초기화 완료');
+  try {
+    const dateKey = getCurrentDateKey();
+    const items = getEffectiveItems(currentCat, dateKey);
+    items.forEach(name => { colsForCat(currentCat).forEach(col => setInput(currentCat, name, col, 0)); });
+    saveInputData();
+    const esc = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
+    await _putPath(`/data/inputData/${esc(dateKey)}/${esc(currentCat)}`, null);
+    closeModal('resetOverlay');
+    renderMainTable();
+    updateSummary();
+    showToast('초기화 완료');
+  } catch (e) {
+    console.error('초기화 중 오류:', e);
+    showToast('⚠️ 초기화 실패: ' + (e && e.message ? e.message : '알 수 없는 오류'));
+  }
 }
 
 // ══════════════════════════════════════════
