@@ -68,10 +68,9 @@ select { border:1px solid #ccc; border-radius:4px; padding:4px 6px; font-size:11
 /* Cat grid */
 .cat-section { margin:8px 16px 16px; }
 .cat-label { font-size:11px; font-weight:bold; color:#555; margin-bottom:8px; }
-.cat-grid { display:grid; grid-template-columns:repeat(6,1fr); border:1px solid #ccc; border-radius:6px; overflow:hidden; }
+.cat-grid { display:grid; grid-template-columns:repeat(8,1fr); border:1px solid #ccc; border-radius:6px; overflow:hidden; }
 .cat-cell { padding:13px 8px; text-align:center; cursor:pointer; font-size:11px; font-weight:600; color:#555; background:#f0f0f0; border-right:1px solid #ccc; border-bottom:1px solid #ccc; user-select:none; transition:background .13s,color .13s; line-height:1.4; }
-.cat-cell:nth-child(6n) { border-right:none; }
-.cat-cell:nth-child(n+7) { border-bottom:none; }
+.cat-cell:nth-child(8n) { border-right:none; }
 .cat-cell:hover { background:#dce8f5; color:#1565C0; }
 .cat-cell.active { background:#1976D2; color:#fff; font-weight:700; }
 .cat-cell.active:hover { background:#1565C0; }
@@ -272,12 +271,11 @@ input:checked + .slider:before { transform:translateX(18px); }
   .notice-banner { margin:6px 10px; padding:6px 10px; font-size:11px; }
   .cat-section { margin:6px 10px 8px; }
   .cat-label { font-size:10px; margin-bottom:5px; }
-  .cat-grid { grid-template-columns:repeat(3,1fr); }
+  .cat-grid { grid-template-columns:repeat(4,1fr); }
   .cat-cell { padding:10px 4px; font-size:10px; line-height:1.3; }
-  .cat-cell:nth-child(6n)   { border-right:1px solid #ccc; }
-  .cat-cell:nth-child(3n)   { border-right:none; }
-  .cat-cell:nth-child(n+7)  { border-bottom:1px solid #ccc; }
-  .cat-cell:nth-child(n+10) { border-bottom:none; }
+  .cat-cell:nth-child(8n)   { border-right:1px solid #ccc; }
+  .cat-cell:nth-child(4n)   { border-right:none; }
+  .cat-cell:nth-child(n+9)  { border-bottom:1px solid #ccc; }
   .current-cat-bar { margin:0 10px 5px; padding:5px 10px; font-size:10px; }
   .current-cat-bar strong { font-size:11px; }
   .table-section { margin:0 10px 10px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
@@ -809,7 +807,8 @@ const CATS = [
   "도안(빵,파이1)","도안(빵,파이2)","도안(케익)",
   "1공장","공방","마카롱,다쿠아즈","쿠키,쨈",
   "둔산(빵,파이1)","둔산(빵,파이2)","둔산(케익)",
-  "갤러리아(빵,파이1)","갤러리아(빵,파이2)","갤러리아(케익)"
+  "갤러리아(빵,파이1)","갤러리아(빵,파이2)","갤러리아(케익)",
+  "둔곡(빵·파이1)","둔곡(빵·파이2)","둔곡(케익)"
 ];
 
 const CAT_DISPLAY_LABELS = {
@@ -845,10 +844,10 @@ const FIXED_COLOR_CATS = new Set(["마카롱,다쿠아즈", "쿠키,쨈"]);
 const COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
 
 function colsForCat(cat) {
-  if (cat === "도안(케익)") {
+  if (cat === "도안(케익)" || cat === "둔곡(케익)") {
     return ["도안점","둔산점","갤러리아점","유성점","건양대점","둔곡점","포장실"];
   }
-  if (cat === "도안(빵,파이2)") {
+  if (cat === "도안(빵,파이2)" || cat === "둔곡(빵·파이2)") {
     return ["도안점","유성점","건양대점","갤러리아점","둔산점(토)","둔곡점","포장실"];
   }
   return COLS;
@@ -885,6 +884,9 @@ function defaultCatData() {
     "갤러리아(빵,파이1)": ["크랜베리롤치즈캄파뉴","감자치아바타","올리브치아바타","쌀식빵","우유식빵","팡도미식빵","공주알밤식빵","모닝빵","소금빵","애플파이","크로와상","시나몬 브레드","마늘홀릭","어니언크림치즈","몽블랑","추억의맘모스빵","커피번","통밀식빵","롱뽀드득 소시지","햄치즈명란마요","바질토마토","단팥빵","야채소세지빵","파이만쥬","에그타르트","초코 마들렌","우유 마들렌","코코팡","쌀꽈배기","쪽파프리글","우유 폭탄","새우바질페스토치아바타","치킨BBQ치아바타","햄치즈 치아바타","야끼소바","에그소금빵","앙버터소금빵","할라피뇨/페페로니 프레첼","무화과 치아바타","소보로빵","양파빵","슈크림 브레산","메론빵","갈릭 베이컨","올리브 베이글","시금치 베이글","블루베리 베이글"],
     "갤러리아(빵,파이2)": ["라구피자","당근라페 샌드위치","구름빵","연탄빵","옥수수빵","명란바게트","매콤칠리소세지","무가당 쌀캄파뉴","레몬시트롱","딸기크로와상","모구모구 화이트","모구모구 초코","두바이 쫀득 쿠키","두바이 에그타르트","땅콩 쿠키","바통쿠키"],
     "갤러리아(케익)": ["계절생크림1호","계절생크림2호","키리쉬1호","키리쉬2호","딸기밭","딸망밭","쌀딸기밭","블루베리","초코밭테디","쇼콜라하트","미니망고티라미스","미니티라미스","미니딸기티라미스","미니밤티라미스","딸크치","초코테디","치즈테디","홀케이크","쁘띠케이크"],
+    "둔곡(빵·파이1)": ["크랜베리롤치즈캄파뉴","콘치즈캄파뉴","감자치아바타","올리브치아","모닝빵","파이만주","마늘홀릭","뽀드득소세지","야채소세지빵","명장팥빵","소금빵","커피번","에그타르트","소보로빵","무화과치아바타","바질토마토","명란소금빵"],
+    "둔곡(빵·파이2)": ["못난이녹차인절미","찹쌀꽈배기","어니언베이글","추억의밤모스","애플데니쉬","몽블랑","쪽파프리글","생도넛","갈릭몽블랑","야끼소바","우유폭탄","화이트롤","시나몬브레드","메론크림빵","초코소라빵","모구모구 화이트","모구모구 초코"],
+    "둔곡(케익)": ["계절생크림1호","계절생크림2호","계절생크림3호","블루베리케익","쇼콜라하트케익","키리쉬1호","키리쉬2호","키리쉬3호","딸기밭","모둠타르트","제리의 치즈케이크","순수우유롤(H)","미니티라미스","미니딸기티라미스"]
   };
 }
 
@@ -900,8 +902,8 @@ function saveCatData() {
 }
 
 // ══════════════════════════════════════════
-// 기존 저장된(로컬/클라우드) catData에 "1공장" 항목이 없으면
-// 한 번만 채워 넣는다 (다른 카테고리/데이터는 절대 건드리지 않음)
+// 기존 저장된(로컬/클라우드) catData에 항목이 없으면
+// 채워 넣는다 (다른 카테고리/데이터는 절대 건드리지 않음)
 // ══════════════════════════════════════════
 function ensureCatDataDefaults() {
   let changed = false;
@@ -909,8 +911,6 @@ function ensureCatDataDefaults() {
     catData["1공장"] = ["하레치즈","우유모찌롤","초코모찌롤","말차모찌롤","사브레","하트","초코사브레","곰돌이","늑구 얼굴, 귀","미니타르트","타르트","몽블랑","크라상","애플","브릴뤠","만주피","파이만주","마롱파이","밀크스틱","레몬시트롱","솔트 휘낭시에","초코 휘낭시에","무화과 휘낭시에"];
     changed = true;
   }
-  // 이미 "1공장"이 있는 기존 사용자 데이터에도 아래 4개 품목이 없으면 추가
-  // (제품명이 바뀌었거나 다음날 사라진다는 문제 방지용 — 다른 품목은 절대 건드리지 않음)
   if (catData["1공장"]) {
     const mustHave = ["레몬시트롱","솔트 휘낭시에","초코 휘낭시에","무화과 휘낭시에"];
     mustHave.forEach(item => {
@@ -920,10 +920,25 @@ function ensureCatDataDefaults() {
       }
     });
   }
+  
+  // 둔곡 분류 추가 확인
+  const defaults = defaultCatData();
+  ["둔곡(빵·파이1)", "둔곡(빵·파이2)", "둔곡(케익)"].forEach(cat => {
+    if (!catData[cat]) {
+      catData[cat] = defaults[cat];
+      changed = true;
+    }
+  });
+
   if (changed) {
     saveCatData();
     const _escSeg = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
-    try { _putPath('/data/catData/' + _escSeg("1공장"), catData["1공장"]); } catch(e) {}
+    try { 
+      if (catData["1공장"]) _putPath('/data/catData/' + _escSeg("1공장"), catData["1공장"]);
+      _putPath('/data/catData/' + _escSeg("둔곡(빵·파이1)"), catData["둔곡(빵·파이1)"]);
+      _putPath('/data/catData/' + _escSeg("둔곡(빵·파이2)"), catData["둔곡(빵·파이2)"]);
+      _putPath('/data/catData/' + _escSeg("둔곡(케익)"), catData["둔곡(케익)"]);
+    } catch(e) {}
   }
   return changed;
 }
@@ -1054,12 +1069,10 @@ function _applyRemoteData(data) {
     catData = data.catData; saveCatData();
     ensureCatDataDefaults();
     renderCatGrid(); updateCurrentBar(); changed = true;
-    // catData 변경 시에도 스크롤 보존 렌더
     _renderWithScrollPreserve();
   }
 
   if (data.inputData) {
-    // ★ PATCH 3: 로컬에 있는 날짜는 리모트가 null/없어도 지우지 않음 (덮어쓰기 방지)
     const focused    = document.activeElement;
     const fCat       = focused && focused.dataset && focused.dataset.cat;
     const fName      = focused && focused.dataset && focused.dataset.name;
@@ -1067,14 +1080,12 @@ function _applyRemoteData(data) {
     const dateKey    = getCurrentDateKey();
 
     const merged = JSON.parse(JSON.stringify(data.inputData));
-    // 로컬에 있는 날짜 키가 리모트에 없으면 로컬 값 보존
     Object.keys(inputData).forEach(d => {
       if (!merged[d] && inputData[d] && Object.keys(inputData[d]).length > 0) {
         merged[d] = JSON.parse(JSON.stringify(inputData[d]));
       }
     });
 
-    // 현재 입력 중인 셀은 로컬 값 우선 유지
     if (fCat && fName && fCol) {
       if (!merged[dateKey])              merged[dateKey] = {};
       if (!merged[dateKey][fCat])        merged[dateKey][fCat] = {};
@@ -1131,7 +1142,6 @@ function _applyRemoteData(data) {
   }
 
   if (changed) {
-    // ★ PATCH 2: 스크롤·포커스 유지 렌더
     _renderWithScrollPreserve();
     updateSummary();
     if (badge) badge.innerHTML = '☁️ <span style="color:#388E3C;">실시간 동기화 ✓</span>';
@@ -1306,11 +1316,8 @@ async function loadFromCloud() {
   if (!data) return false;
   if (data.catData)   { catData = data.catData;     saveCatData(); ensureCatDataDefaults(); }
   if (data.inputData && typeof data.inputData === 'object' && Object.keys(data.inputData).length > 0) {
-    // 로컬 데이터 우선 보존: Firebase에 없는 날짜는 로컬 값 유지
     const merged = {};
-    // 먼저 Firebase 데이터
     Object.keys(data.inputData).forEach(d => { merged[d] = data.inputData[d]; });
-    // 로컬에만 있는 날짜 키 추가 (덮어쓰지 않음)
     Object.keys(inputData).forEach(d => {
       if (!merged[d] && inputData[d] && Object.keys(inputData[d]).length > 0) {
         merged[d] = inputData[d];
@@ -1318,8 +1325,6 @@ async function loadFromCloud() {
     });
     inputData = merged;
     saveInputData();
-  } else if (!data.inputData) {
-    // Firebase에 inputData가 없으면 로컬 값 그대로 유지 (덮어쓰기 방지)
   }
   if (data.memos)     { memos = data.memos;         saveMemos(); }
   if (Array.isArray(data.records)) {
@@ -1361,14 +1366,9 @@ let currentCat = CATS[0];
 let currentMemoKey = '';
 let autoSave = true;
 
-// ══════════════════════════════════════════
-// ★ PATCH 1: 날짜 기준 유효 제품 목록 반환 헬퍼
-// 삭제된 제품도 해당 날짜 이전(deletedFrom > dateKey)이면 목록에 포함
-// ══════════════════════════════════════════
 function getEffectiveItems(cat, dateKey) {
   const current = (catData[cat] || []).slice();
   const deleted = (catData._deletedItems && catData._deletedItems[cat]) || [];
-  // deletedFrom이 dateKey보다 크면 → 해당 날짜엔 아직 있던 제품
   const extra = deleted.filter(d =>
     d.deletedFrom > dateKey && !current.includes(d.name)
   );
@@ -1376,7 +1376,6 @@ function getEffectiveItems(cat, dateKey) {
   return [...current, ...extra.map(d => d.name)];
 }
 
-// ★ PATCH 2: 스크롤·포커스 유지 렌더 헬퍼
 function _renderWithScrollPreserve() {
   const scrollX = window.scrollX, scrollY = window.scrollY;
   const focused = document.activeElement;
@@ -1391,7 +1390,6 @@ function _renderWithScrollPreserve() {
     };
   }
   renderMainTable();
-  // requestAnimationFrame으로 DOM 업데이트 후 복원
   requestAnimationFrame(() => {
     window.scrollTo(scrollX, scrollY);
     if (focusKey) {
@@ -1408,9 +1406,6 @@ function _renderWithScrollPreserve() {
   });
 }
 
-// ══════════════════════════════════════════
-// 렌더
-// ══════════════════════════════════════════
 function renderCatGrid() {
   const grid = document.getElementById('catGrid');
   grid.innerHTML = '';
@@ -1455,7 +1450,6 @@ function setInput(cat, name, col, val) {
 function renderMainTable() {
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
-  // ★ PATCH 1: 날짜 기준 유효 제품 목록 사용
   const items = getEffectiveItems(currentCat, getCurrentDateKey());
   const curCols = colsForCat(currentCat);
   const lastColIdx = curCols.length - 1;
@@ -1549,9 +1543,6 @@ function onInputChange(el) {
   }
 }
 
-// ══════════════════════════════════════════
-// 수량 입력칸 색상 기능 (날짜별 독립 저장)
-// ══════════════════════════════════════════
 let qtyColors = JSON.parse(localStorage.getItem('qtyColors')||'{}');
 let productColors = JSON.parse(localStorage.getItem('productColors')||'{}');
 let _selectedQtyEl = null;
@@ -1754,9 +1745,6 @@ function updateSummary() {
   document.getElementById('sc3').textContent = savedDays;
 }
 
-// ══════════════════════════════════════════
-// 날짜별 잠금 시스템
-// ══════════════════════════════════════════
 function _loadAdminPw() {
   try { const s = localStorage.getItem('adminPw'); return s || 'hare1234'; } catch(e) { return 'hare1234'; }
 }
@@ -1835,9 +1823,6 @@ function updateReadOnlyBanner() {
   }
 }
 
-// ══════════════════════════════════════════
-// 관리자 패널
-// ══════════════════════════════════════════
 function openAdminPanel() {
   const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
   const yy = yesterday.getFullYear();
@@ -1974,9 +1959,6 @@ document.getElementById('dateInput').addEventListener('change', () => {
   }, ms);
 })();
 
-// ══════════════════════════════════════════
-// 판매가 blur 핸들러
-// ══════════════════════════════════════════
 function onPriceBlur(el) {
   if (el.disabled) return;
   const name = el.dataset.name;
@@ -1988,9 +1970,6 @@ function onPriceBlur(el) {
   cloudPushPrice(name, raw > 0 ? raw : null);
 }
 
-// ══════════════════════════════════════════
-// 결산 기능
-// ══════════════════════════════════════════
 const SETT_STORE_CATS = {
   '도안점':    ['도안(빵,파이1)','도안(빵,파이2)','도안(케익)','공방','마카롱,다쿠아즈','쿠키,쨈'],
   '둔산점':    ['둔산(빵,파이1)','둔산(빵,파이2)','둔산(케익)'],
@@ -2144,7 +2123,6 @@ function renderSettlement(store) {
   const dateKeys = _settDateKeys().sort();
 
   cats.forEach(cat => {
-    // ★ PATCH 1: 날짜별 유효 제품 목록 사용
     const catCols = colsForCat(cat);
     let catQty = 0, catAmt = 0, dateBlocks = '';
 
@@ -2152,7 +2130,6 @@ function renderSettlement(store) {
       dateBlocks = `<div style="text-align:center;color:#bbb;padding:16px;font-size:11px;">출고 수량 없음</div>`;
     } else {
       dateKeys.forEach(d => {
-        // 해당 날짜 기준 유효 제품 목록
         const dItems = getEffectiveItems(cat, d);
         let rowNum = 1, rows = '';
         dItems.forEach(name => {
@@ -2230,9 +2207,6 @@ function renderSettlement(store) {
   el.innerHTML = html;
 }
 
-// ══════════════════════════════════════════
-// 누적 집계 기능
-// ══════════════════════════════════════════
 let _accumMode     = 'month';
 let _accumFromDate = '';
 let _accumToDate   = '';
@@ -2362,7 +2336,6 @@ function renderAccum() {
   }
 
   targetCats.forEach(cat => {
-    // ★ PATCH 1: 기간 내 가장 이른 날짜 기준으로 유효 제품 목록 산출
     const earliestDate = dateKeys.length ? dateKeys[0] : _accumFromDate;
     const accumItems = getEffectiveItems(cat, earliestDate);
     if (!accumItems.length) return;
@@ -2449,9 +2422,6 @@ function renderAccum() {
   el.innerHTML = html;
 }
 
-// ══════════════════════════════════════════
-// 마카롱 / 다쿠아즈 세부 입력 팝업
-// ══════════════════════════════════════════
 const MACARON_DETAIL_COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점"];
 
 let _macaronDetailProduct = '';
@@ -2602,7 +2572,6 @@ function exportAccumCSV() {
 
   let csv = `분류,제품명,${storeCols.join(',')},합계\n`;
   targetCats.forEach(cat => {
-    // ★ PATCH 1: 날짜 기준 유효 제품 목록
     getEffectiveItems(cat, earliestDate).forEach(name => {
       const vals = storeCols.map(col => getAccumVal(cat, name, col));
       const total = vals.reduce((s, v) => s + v, 0);
@@ -2630,7 +2599,6 @@ function exportSettlementCSV() {
   cats.forEach(cat => {
     const catCols = colsForCat(cat);
     dateKeys.forEach(d => {
-      // ★ PATCH 1: 날짜 기준 유효 제품 목록
       getEffectiveItems(cat, d).forEach(name => {
         const qty = catCols.reduce((sum, c) => {
           return sum + ((inputData[d]&&inputData[d][cat]&&inputData[d][cat][name]) ? (inputData[d][cat][name][c]||0) : 0);
@@ -2647,16 +2615,10 @@ function exportSettlementCSV() {
   showToast(`${store} 결산 CSV 다운로드 완료`);
 }
 
-// ══════════════════════════════════════════
-// 저장
-// ══════════════════════════════════════════
-
-// 관리자 인증 후 잠긴 날짜 편집 허용 (★ 신규 추가 — 누락되어 있던 함수)
-// 저장/초기화 버튼이 "잠긴 날짜"에서 아무 반응 없이 실패하던 원인이었습니다.
 function checkAdminAndEdit(callback) {
   if (_isAdminLoggedIn) { callback(); return; }
   const pw = prompt('🔒 잠긴 날짜입니다. 수정하려면 관리자 비밀번호를 입력하세요:');
-  if (pw === null) return; // 취소
+  if (pw === null) return;
   if (pw === ADMIN_PW) {
     _isAdminLoggedIn = true;
     const dateKey = getCurrentDateKey();
@@ -2680,7 +2642,6 @@ async function saveData() {
   await _doSaveData();
 }
 
-// ★ 수정: try/catch 추가 — 오류가 나도 조용히 묻히지 않고 토스트로 알려줍니다
 async function _doSaveData() {
   try {
     saveCatData();
@@ -2722,7 +2683,6 @@ function _doConfirmReset() {
   openModal('resetOverlay');
 }
 
-// ★ 수정: try/catch 추가 — 오류가 나도 조용히 묻히지 않고 토스트로 알려줍니다
 async function doReset() {
   try {
     const dateKey = getCurrentDateKey();
@@ -2741,9 +2701,6 @@ async function doReset() {
   }
 }
 
-// ══════════════════════════════════════════
-// CSV 내보내기
-// ══════════════════════════════════════════
 function exportCSV() {
   const date = document.getElementById('dateInput').value;
 
@@ -2760,7 +2717,6 @@ function exportCSV() {
 
   CATS.forEach(cat=>{
     const catCols = colsForCat(cat);
-    // ★ PATCH 1: 날짜 기준 유효 제품 목록
     getEffectiveItems(cat, date).forEach(name=>{
       const vals = allCols.map(col => catCols.includes(col) ? getInput(cat,name,col) : '');
       const memoKey = cat + '__' + name;
@@ -2779,9 +2735,6 @@ function exportCSV() {
   showToast('CSV 다운로드 완료');
 }
 
-// ══════════════════════════════════════════
-// 목록·항목 수정 팝업
-// ══════════════════════════════════════════
 function openEditItems() {
   document.getElementById('editModalTitle').textContent = `📂 ${getCatDisplayLabel(currentCat)} — 품목 수정`;
   document.getElementById('addItemInput').value = '';
@@ -2885,12 +2838,10 @@ function addItem() {
 document.getElementById('addItemInput').addEventListener('keydown', e => { if (e.key==='Enter') addItem(); });
 document.getElementById('addPosInput').addEventListener('keydown', e => { if (e.key==='Enter') addItem(); });
 
-// ★ PATCH 1: saveItems — 삭제된 제품을 _deletedItems에 날짜 기록
 async function saveItems() {
   const inputs = document.querySelectorAll('#editItemList .item-input');
   const oldItems = (catData[currentCat] || []).slice();
 
-  // 이름 변경 시 가격 키도 이전
   inputs.forEach(inp => {
     const i = parseInt(inp.dataset.idx);
     const oldName = oldItems[i];
@@ -2905,14 +2856,12 @@ async function saveItems() {
   collectCurrentEdits();
   const newItems = (catData[currentCat]||[]).filter(v => v && v.trim());
 
-  // 삭제된 제품을 _deletedItems에 날짜와 함께 기록 (과거 데이터 보존용)
   const deletedNames = oldItems.filter(n => n && !newItems.includes(n));
   if (deletedNames.length > 0) {
     const deleteFromDate = getCurrentDateKey();
     if (!catData._deletedItems) catData._deletedItems = {};
     if (!catData._deletedItems[currentCat]) catData._deletedItems[currentCat] = [];
     deletedNames.forEach(name => {
-      // 이미 기록된 항목이면 유지 (더 이른 날짜의 삭제 기록 보존)
       const exists = catData._deletedItems[currentCat].find(d => d.name === name);
       if (!exists) {
         catData._deletedItems[currentCat].push({ name, deletedFrom: deleteFromDate });
@@ -2936,9 +2885,6 @@ async function saveItems() {
   showToast('품목 저장 완료 ✓');
 }
 
-// ══════════════════════════════════════════
-// 메모 팝업
-// ══════════════════════════════════════════
 function openMemo(cat, name, key) {
   currentMemoKey = key;
   document.getElementById('memoProductName').textContent = `${getCatDisplayLabel(cat)} > ${name}`;
@@ -2956,9 +2902,6 @@ function saveMemo() {
   showToast('메모 저장 완료');
 }
 
-// ══════════════════════════════════════════
-// 기록 팝업
-// ══════════════════════════════════════════
 function openRecord() {
   const body = document.getElementById('recordBody');
   if(!records.length) {
@@ -2990,9 +2933,6 @@ async function clearAllRecords() {
   showToast('기록 삭제 완료');
 }
 
-// ══════════════════════════════════════════
-// 설정 팝업
-// ══════════════════════════════════════════
 function openSettings() {
   document.getElementById('settingAutoSave').checked = autoSave;
   const storedKey = localStorage.getItem('cloudApiKey') || '';
@@ -3110,16 +3050,10 @@ async function resetAllData() {
   showToast('전체 초기화 완료');
 }
 
-// ══════════════════════════════════════════
-// 팝업 유틸
-// ══════════════════════════════════════════
 function openModal(id) { document.getElementById(id).classList.add('show'); }
 function closeModal(id) { document.getElementById(id).classList.remove('show'); }
 function overlayClick(e, id) { if(e.target===document.getElementById(id)) closeModal(id); }
 
-// ══════════════════════════════════════════
-// Toast
-// ══════════════════════════════════════════
 let toastTimer;
 function showToast(msg) {
   const t = document.getElementById('toast');
@@ -3144,16 +3078,11 @@ window.addEventListener('beforeunload', () => {
   });
 });
 
-// ══════════════════════════════════════════
-// 초기 렌더
-// ══════════════════════════════════════════
-// ★ 안전장치: inputData가 유효한 객체면 건드리지 않음
 (function ensureInputDataValid() {
   if (!inputData || typeof inputData !== 'object') {
     inputData = {};
     saveInputData();
   }
-  // 유효한 데이터가 있으면 아무것도 하지 않음 (데이터 보호)
 })();
 
 renderCatGrid();
@@ -3162,9 +3091,6 @@ updateCurrentBar();
 updateSummary();
 updateReadOnlyBanner();
 
-// ══════════════════════════════════════════
-// Firebase 시작 — SSE 실시간 스트리밍
-// ══════════════════════════════════════════
 (async () => {
   const badge = document.getElementById('cloudBadge');
   if (badge) badge.innerHTML = '☁️ <span style="color:#1976D2;">연결 중...</span>';
