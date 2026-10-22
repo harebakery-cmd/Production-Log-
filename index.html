@@ -68,9 +68,9 @@ select { border:1px solid #ccc; border-radius:4px; padding:4px 6px; font-size:11
 /* Cat grid */
 .cat-section { margin:8px 16px 16px; }
 .cat-label { font-size:11px; font-weight:bold; color:#555; margin-bottom:8px; }
-.cat-grid { display:grid; grid-template-columns:repeat(8,1fr); border:1px solid #ccc; border-radius:6px; overflow:hidden; }
+.cat-grid { display:grid; grid-template-columns:repeat(9,1fr); border:1px solid #ccc; border-radius:6px; overflow:hidden; }
 .cat-cell { padding:13px 8px; text-align:center; cursor:pointer; font-size:11px; font-weight:600; color:#555; background:#f0f0f0; border-right:1px solid #ccc; border-bottom:1px solid #ccc; user-select:none; transition:background .13s,color .13s; line-height:1.4; }
-.cat-cell:nth-child(8n) { border-right:none; }
+.cat-cell:nth-child(9n) { border-right:none; }
 .cat-cell:hover { background:#dce8f5; color:#1565C0; }
 .cat-cell.active { background:#1976D2; color:#fff; font-weight:700; }
 .cat-cell.active:hover { background:#1565C0; }
@@ -273,9 +273,9 @@ input:checked + .slider:before { transform:translateX(18px); }
   .cat-label { font-size:10px; margin-bottom:5px; }
   .cat-grid { grid-template-columns:repeat(4,1fr); }
   .cat-cell { padding:10px 4px; font-size:10px; line-height:1.3; }
-  .cat-cell:nth-child(8n)   { border-right:1px solid #ccc; }
+  .cat-cell:nth-child(9n)   { border-right:1px solid #ccc; }
   .cat-cell:nth-child(4n)   { border-right:none; }
-  .cat-cell:nth-child(n+9)  { border-bottom:1px solid #ccc; }
+  .cat-cell:nth-child(n+10)  { border-bottom:1px solid #ccc; }
   .current-cat-bar { margin:0 10px 5px; padding:5px 10px; font-size:10px; }
   .current-cat-bar strong { font-size:11px; }
   .table-section { margin:0 10px 10px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
@@ -808,7 +808,8 @@ const CATS = [
   "1공장","공방","마카롱,다쿠아즈","쿠키,쨈",
   "둔산(빵,파이1)","둔산(빵,파이2)","둔산(케익)",
   "갤러리아(빵,파이1)","갤러리아(빵,파이2)","갤러리아(케익)",
-  "둔곡(빵·파이1)","둔곡(빵·파이2)","둔곡(케익)"
+  "둔곡(빵·파이1)","둔곡(빵·파이2)","둔곡(케익)",
+  "둔곡(선물용 및 다대)", "둔곡(쿠키,쨈)"
 ];
 
 const CAT_DISPLAY_LABELS = {
@@ -823,7 +824,7 @@ const FIXED_PRODUCT_COLORS = {
   "우유모찌롤":   "#D1ECF1",
   "초코모찌롤":   "#D1ECF1",
   "말차모찌롤":   "#D1ECF1",
-  "밀크스틱(공방)":         "#D1ECF1",
+  "밀크ส틱(공방)":         "#D1ECF1",
   "휘낭시에":     "#D1ECF1",
   "레몬시트롱":   "#D1ECF1",
   "미니오렌지살구": "#F8D7DA",
@@ -839,7 +840,7 @@ const FIXED_PRODUCT_COLORS = {
   "쉘":           "#D4EDDA",
   "뽀로":         "#D4EDDA",
 };
-const FIXED_COLOR_CATS = new Set(["마카롱,다쿠아즈", "쿠키,쨈"]);
+const FIXED_COLOR_CATS = new Set(["마카롱,다쿠아즈", "쿠키,쨈", "둔곡(쿠키,쨈)"]);
 
 const COLS = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
 
@@ -877,7 +878,7 @@ function defaultCatData() {
     "1공장": ["하레치즈","우유모찌롤","초코모찌롤","말차모찌롤","사브레","하트","초코사브레","곰돌이","늑구 얼굴, 귀","미니타르트","타르트","몽블랑","크라상","애플","브릴뤠","만주피","파이만주","마롱파이","밀크스틱","레몬시트롱","솔트 휘낭시에","초코 휘낭시에","무화과 휘낭시에"],
     "공방": ["닭가슴살 샐러드","매콤닭가슴살 샌드위치","비어햄 샌드위치","반미 샌드위치","에그&햄 샌드위치","에그 샌드위치","햄 샌드위치","포카치아 샌드위치","두부치아바타 버거","햄치즈 치아바타","새우바질페스토치아바타","치키BBQ치아바타","우유식빵","하레식빵","48시간 호밀빵","통밀빵","햄에그토스트","호두과자","하레치즈","100%호밀빵","초코모찌롤","바게트","호두바게트","레몬시트롱","휘낭시에","호두찰식빵","크로와상","파니니","어니언베이글","버터떡"],
     "마카롱,다쿠아즈": ["마카롱류","버터롤","모카롤","호두파운드","오렌지파운드","쇼콜라오랑쥬","찹쌀카스테라","팥카스테라","아몬드캬라멜파운드","벌꿀카스테라","우유모찌롤","초코모찌롤","말차모찌롤","파네토네","호두쉬폰","쌀쉬폰","밀봉","초코우유마들렌","우유마들렌","쌀치즈카스테라","대전샌드 카라멜","대전샌드 딸기","밀크스틱","호두과자","휘낭시에","레몬시트롱","미니당근","미니초코산딸기","미니오렌지살구","미니살라망드","식빵러스크","하레러스크","아그작러스크"],
-    "쿠키,쨈": ["곰돌이쿠키","하트쿠키","복샌드쿠키","말쿠키","브로드네쥬","코코넛쿠키","로얄쇼콜라","세자무","샤브레","초코샤브레","쉘","뽀로","땅콩쿠키","쇼콜라프로겐트","치즈스틱","크랜베리쿠키","바통","모카초코칩쿠키","오트밀초코쿠키","카페브릭","메종쿠키","샤브레티쿠키","생초콜릿(다크)","쑥인절미","하레치즈볼","병딸기쨈","쫀득쿠키"],
+    "쿠키,쨈": ["곰돌이쿠키","하트쿠키","복샌드쿠키","말쿠키","브로드네쥬","코코넛쿠키","로얄쇼콜라","세자무","샤브레","초코샤브레","쉘","뽀로","땅콩쿠키","쇼콜라프로겐트","치즈스틱","크랜베리쿠키","바통","모카초코칩쿠키","오트밀초코කු키","카페브릭","메종쿠키","샤브레티쿠키","생초콜릿(다크)","쑥인절미","하레치즈볼","병딸기쨈","쫀득쿠키"],
     "둔산(빵,파이1)": ["감자치아바타","올리브치아바타","미니쌀식빵","우유식빵","팡도미","통밀식빵","크랜베리식빵","로겐호밀빵","공주알밤식빵","모닝빵","애플파이","크로와상","레몬크로와상","소금빵","어니언베이글","추억의밤모스","명장팥빵","버터크림빵","야채소세지빵","갈릭토스트","우유마들렌","초코우유마들렌","우유폭탄","생도넛","바질소금빵","야끼소바빵","감자베이컨","쌀치즈카스테라","살라망드","뽀로","쉘","러스크","생크림커피번","빵오초코","명란감자빵","쨈치즈꼬다리","완두앙금빵","초코가나슈빵","딸기붕어","슈크림붕어","딸기모찌","두바이 에그타르트","두바이 쫀득 쿠키","쌀단팥빵"],
     "둔산(빵,파이2)": ["몽블랑","못난이녹차인절미","뽀드득소세지","마늘홀릭","파이만주","플레인스콘","얼그레이스콘","찹쌀꽈배기","고로케","소보로","팥도넛","커피번","바질토마토","연탄빵","에그타르트","사과크럼블타르트","쪽파프리글","어니언크림","명란소금빵","리얼우유크림도넛","시나몬브레드","단짠단짠양파빵","블루베리치즈번","쫀득감자빵","갈릭소세지데니쉬","깜빵","계절과일팡도르","메론크림빵","찰옥수수빵","쌀꽈배기","태산앙금팥빵","딸기파이","고구마듬뿍페스츄리","월넛크림브레드","무가담빵","쌀캄파뉴","포카치아샌드위치","모구모구","초코 모구모구"],
     "둔산(케익)": ["계절생크림1호","계절생크림2호","계절생크림3호","강아지케이크","곰돌이케이크","망고밭","블루베리케익","키리쉬1호","키리쉬2호","키리쉬3호","쇼콜라하트케익","딸기밭","크림치즈딸기타르트","쌀로만든딸기밭","미니망고","쇼콜라테디","크럼블레어","망고케이크","커피카라멜","제리의 치즈케이크","딸기몽블랑","그래놀라요거트","생체리초코케이크","체리치즈(조각)","피치요거트케이크","요거! 귤 케이크","미니! 귤 케이크","무화과케이크","초코쏙테디","딸망밭","쁘띠초코밭","쌀과일밭","모둠타르트","미니피치","샤인밭","미니망고","미니망고티라","미니티라","미니딸기티라","눈사람","고백하레"],
@@ -886,7 +887,9 @@ function defaultCatData() {
     "갤러리아(케익)": ["계절생크림1호","계절생크림2호","키리쉬1호","키리쉬2호","딸기밭","딸망밭","쌀딸기밭","블루베리","초코밭테디","쇼콜라하트","미니망고티라미스","미니티라미스","미니딸기티라미스","미니밤티라미스","딸크치","초코테디","치즈테디","홀케이크","쁘띠케이크"],
     "둔곡(빵·파이1)": ["크랜베리롤치즈캄파뉴","콘치즈캄파뉴","감자치아바타","올리브치아","모닝빵","파이만주","마늘홀릭","뽀드득소세지","야채소세지빵","명장팥빵","소금빵","커피번","에그타르트","소보로빵","무화과치아바타","바질토마토","명란소금빵"],
     "둔곡(빵·파이2)": ["못난이녹차인절미","찹쌀꽈배기","어니언베이글","추억의밤모스","애플데니쉬","몽블랑","쪽파프리글","생도넛","갈릭몽블랑","야끼소바","우유폭탄","화이트롤","시나몬브레드","메론크림빵","초코소라빵","모구모구 화이트","모구모구 초코"],
-    "둔곡(케익)": ["계절생크림1호","계절생크림2호","계절생크림3호","블루베리케익","쇼콜라하트케익","키리쉬1호","키리쉬2호","키리쉬3호","딸기밭","모둠타르트","제리의 치즈케이크","순수우유롤(H)","미니티라미스","미니딸기티라미스"]
+    "둔곡(케익)": ["계절생크림1호","계절생크림2호","계절생크림3호","블루베리케익","쇼콜라하트케익","키리쉬1호","키리쉬2호","키리쉬3호","딸기밭","모둠타르트","제리의 치즈케이크","순수우유롤(H)","미니티라미스","미니딸기티라미스"],
+    "둔곡(선물용 및 다대)": ["마카롱류","버터롤","모카롤","호두파운드","오렌지파운드","쇼콜라오랑쥬","찹쌀카스테라","팥카스테라","아몬드캬라멜파운드","벌꿀카스테라","우유모찌롤","초코모찌롤","말차모찌롤","파네토네","호두쉬폰","쌀쉬폰","밀봉","초코우유마들렌","우유마들렌","쌀치즈카스테라","대전샌드 카라멜","대전샌드 딸기","밀크스틱","호두과자","휘낭시에","레몬시트롱","미니당근","미니초코산딸기","미니오렌지살구","미니살라망드","식빵러스크","하레러스크","아그작러스크"],
+    "둔곡(쿠키,쨈)": ["곰돌이쿠키","하트쿠키","복샌드쿠키","말쿠키","브로드네쥬","코코넛쿠키","로얄쇼콜라","세자무","샤브레","초코샤브레","쉘","뽀로","땅콩쿠키","쇼콜라프로겐트","치즈스틱","크랜베리쿠키","바통","모카초코칩쿠키","오트밀초코쿠키","카페브릭","메종쿠키","샤브레티쿠키","생초콜릿(다크)","쑥인절미","하레치즈볼","병딸기쨈","쫀득쿠키"]
   };
 }
 
@@ -897,7 +900,7 @@ function loadCatData() {
       const parsed = JSON.parse(s);
       const defaults = defaultCatData();
       // 사용자가 커스텀한 데이터는 유지하되, 빠진 둔곡 카테고리만 채워넣기
-      ["둔곡(빵·파이1)", "둔곡(빵·파이2)", "둔곡(케익)"].forEach(cat => {
+      Object.keys(defaults).forEach(cat => {
         if (!parsed[cat]) parsed[cat] = defaults[cat];
       });
       return parsed;
@@ -913,7 +916,7 @@ function saveCatData() {
 function ensureCatDataDefaults() {
   let changed = false;
   const defaults = defaultCatData();
-  ["둔곡(빵·파이1)", "둔곡(빵·파이2)", "둔곡(케익)"].forEach(cat => {
+  Object.keys(defaults).forEach(cat => {
     if (!catData[cat]) {
       catData[cat] = defaults[cat];
       changed = true;
@@ -924,9 +927,9 @@ function ensureCatDataDefaults() {
     saveCatData();
     const _escSeg = s => s.replace(/[.$#\[\]/]/g, c => '%' + c.charCodeAt(0).toString(16).toUpperCase());
     try { 
-      _putPath('/data/catData/' + _escSeg("둔곡(빵·파이1)"), catData["둔곡(빵·파이1)"]);
-      _putPath('/data/catData/' + _escSeg("둔곡(빵·파이2)"), catData["둔곡(빵·파이2)"]);
-      _putPath('/data/catData/' + _escSeg("둔곡(케익)"), catData["둔곡(케익)"]);
+      Object.keys(defaults).forEach(cat => {
+        if (catData[cat]) _putPath('/data/catData/' + _escSeg(cat), catData[cat]);
+      });
     } catch(e) {}
   }
   return changed;
@@ -1054,10 +1057,10 @@ function _applyRemoteData(data) {
   const badge = document.getElementById('cloudBadge');
   let changed = false;
 
-  // ★ 클라우드에서 받아올 때 사용자가 수정한 둔곡 품목 데이터가 유지되도록 머지 (덮어쓰기 방지)
+  // ★ 클라우드에서 받아올 때 사용자가 수정한 품목 데이터가 유지되도록 머지 (덮어쓰기 방지)
   if (data.catData) {
     let mergedCatData = JSON.parse(JSON.stringify(data.catData));
-    ["둔곡(빵·파이1)", "둔곡(빵·파이2)", "둔곡(케익)"].forEach(cat => {
+    Object.keys(defaultCatData()).forEach(cat => {
       if (catData[cat] && catData[cat].length > 0) {
         mergedCatData[cat] = catData[cat]; // 로컬에서 수정한 내역 우선 보존
       }
@@ -1317,10 +1320,10 @@ async function loadFromCloud() {
   if (!data) return false;
   
   if (data.catData) {
-    // 클라우드 데이터와 로컬 데이터를 병합하여 사용자가 수정한 둔곡 품목이 사라지지 않게 처리
+    // 클라우드 데이터와 로컬 데이터를 병합하여 사용자가 수정한 품목이 사라지지 않게 처리
     let mergedCatData = JSON.parse(JSON.stringify(data.catData));
     const localCat = loadCatData();
-    ["둔곡(빵·파이1)", "둔곡(빵·파이2)", "둔곡(케익)"].forEach(cat => {
+    Object.keys(defaultCatData()).forEach(cat => {
       if (localCat[cat] && localCat[cat].length > 0) {
         mergedCatData[cat] = localCat[cat];
       }
@@ -1501,7 +1504,7 @@ function renderMainTable() {
       : '';
     const savedProductBg = _fixedColor || _pColors[productColorKey] || '';
 
-    const isMacaronItem = (currentCat === '마카롱,다쿠아즈' && name === '마카롱류');
+    const isMacaronItem = ((currentCat === '마카롱,다쿠아즈' || currentCat === '둔곡(선물용 및 다대)') && name === '마카롱류');
     const dblClickAttr = isMacaronItem ? ` ondblclick="openMacaronDetail('${name.replace(/'/g,"\\'")}',event)"` : '';
     const dblClickHint = isMacaronItem ? ' title="더블클릭: 세부 입력"' : '';
     cells += `<td class="col-product" data-product-key="${productColorKey}" style="${savedProductBg ? 'background:'+savedProductBg+';' : ''}" onclick="onProductCellClick(this)"${dblClickAttr}${dblClickHint}>${name}${isMacaronItem ? ' <span style="font-size:9px;color:#aaa;">[더블클릭]</span>' : ''}</td>`;
@@ -1535,7 +1538,7 @@ function renderMainTable() {
       </td>`;
     });
 
-    cells += `<td style="padding:3px 2px;"><button class="note-btn${hasMemo?' has-memo':''}" onclick="openMemo('${currentCat}','${name.replace(/'/g,"\\'")}','${memoKey.replace(/'/g,"\\'")}')">
+    cells += `<td style="padding:3px 2px;"><button class="note-btn${hasMemo?' has-memo':''}" onclick="openMemo('${currentCat}','${name.replace(/'/g,"\\'")}','${memoKey.replace(/'/g,"\\\\'")}')">
       ${hasMemo||'메모입력'}
     </button></td>`;
 
