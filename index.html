@@ -899,7 +899,6 @@ function loadCatData() {
     if (s) {
       const parsed = JSON.parse(s);
       const defaults = defaultCatData();
-      // 사용자가 커스텀한 데이터는 유지하되, 빠진 둔곡 카테고리만 채워넣기
       Object.keys(defaults).forEach(cat => {
         if (!parsed[cat]) parsed[cat] = defaults[cat];
       });
@@ -1057,12 +1056,11 @@ function _applyRemoteData(data) {
   const badge = document.getElementById('cloudBadge');
   let changed = false;
 
-  // ★ 클라우드에서 받아올 때 사용자가 수정한 품목 데이터가 유지되도록 머지 (덮어쓰기 방지)
   if (data.catData) {
     let mergedCatData = JSON.parse(JSON.stringify(data.catData));
     Object.keys(defaultCatData()).forEach(cat => {
       if (catData[cat] && catData[cat].length > 0) {
-        mergedCatData[cat] = catData[cat]; // 로컬에서 수정한 내역 우선 보존
+        mergedCatData[cat] = catData[cat];
       }
     });
     if (JSON.stringify(mergedCatData) !== JSON.stringify(catData)) {
@@ -1269,7 +1267,7 @@ async function saveAll() {
   saveCatData(); saveInputData(); saveMemos(); saveRecords();
   savePrices(); saveSavedDays(); saveProductColors(); saveQtyColors();
   const results = await Promise.all([
-    _putPath('/data/catData',       catData), // 품목 데이터 서버 저장 추가
+    _putPath('/data/catData',       catData),
     _putPath('/data/inputData',     inputData),
     _putPath('/data/memos',         Object.keys(memos).length ? memos : null),
     _putPath('/data/prices',        Object.keys(PRICES).length ? PRICES : null),
@@ -1320,7 +1318,6 @@ async function loadFromCloud() {
   if (!data) return false;
   
   if (data.catData) {
-    // 클라우드 데이터와 로컬 데이터를 병합하여 사용자가 수정한 품목이 사라지지 않게 처리
     let mergedCatData = JSON.parse(JSON.stringify(data.catData));
     const localCat = loadCatData();
     Object.keys(defaultCatData()).forEach(cat => {
@@ -1991,8 +1988,9 @@ const SETT_STORE_CATS = {
   '도안점':    ['도안(빵,파이1)','도안(빵,파이2)','도안(케익)','공방','마카롱,다쿠아즈','쿠키,쨈'],
   '둔산점':    ['둔산(빵,파이1)','둔산(빵,파이2)','둔산(케익)'],
   '갤러리아점':['갤러리아(빵,파이1)','갤러리아(빵,파이2)','갤러리아(케익)'],
+  '둔곡점':    ['둔곡(빵·파이1)','둔곡(빵·파이2)','둔곡(케익)','둔곡(선물용 및 다대)','둔곡(쿠키,쨈)']
 };
-const SETT_STORE_COL = { '도안점':'도안점', '둔산점':'둔산점', '갤러리아점':'갤러리아점' };
+const SETT_STORE_COL = { '도안점':'도안점', '둔산점':'둔산점', '갤러리아점':'갤러리아점', '둔곡점':'둔곡점' };
 
 let _currentSettTab = '도안점';
 let _settMode = 'month';
@@ -2340,7 +2338,7 @@ function renderAccum() {
   const catFilter = document.getElementById('accumCatFilter').value;
   const targetCats = catFilter === '__ALL__' ? CATS : [catFilter];
 
-  const storeCols = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
+  const storeCols = COLS;
 
   const grandStore = Object.fromEntries(storeCols.map(c => [c, 0]));
   let grandTotal = 0;
@@ -2578,7 +2576,7 @@ function exportMacaronDetailExcel() {
 }
 
 function exportAccumCSV() {
-  const storeCols = ["둔산점","갤러리아점","도안점","유성점","건양대점","둔곡점","포장실"];
+  const storeCols = COLS;
   const catFilter = document.getElementById('accumCatFilter').value;
   const targetCats = catFilter === '__ALL__' ? CATS : [catFilter];
   const periodSuffix = _accumMode === 'month'
